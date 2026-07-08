@@ -459,28 +459,21 @@ static void draw_controls(TuiState *state) {
 
     term_goto(y + 1, x + 2);
     if (state->dist == DIST_UNIFORM)
-        printf("[*] Uniform");
+        printf("[*] Uniform      ");
     else
-        printf("[ ] Uniform (U)");
-    /* pad this line */
-    term_goto(y + 1, x);
-    printf("%-*s", LEFT_W, "");  /* clears to end of row */
+        printf("[ ] Uniform (U)  ");
 
     term_goto(y + 2, x + 2);
     if (state->dist == DIST_NORMAL)
-        printf("[*] Normal");
+        printf("[*] Normal       ");
     else
-        printf("[ ] Normal (N)");
-    term_goto(y + 2, x);
-    printf("%-*s", LEFT_W, "");
+        printf("[ ] Normal (N)   ");
 
     term_goto(y + 3, x + 2);
     if (state->dist == DIST_BERNOULLI)
-        printf("[*] Bernoulli");
+        printf("[*] Bernoulli    ");
     else
         printf("[ ] Bernoulli (B)");
-    term_goto(y + 3, x);
-    printf("%-*s", LEFT_W, "");
 
     /* Parameter fields — only show relevant ones for current distribution */
     const char *labels[FIELD_COUNT] = {
