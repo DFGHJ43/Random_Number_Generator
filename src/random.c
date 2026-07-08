@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+/* rand() is intentionally used for this learning project */
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -22,7 +24,7 @@ int rng_uniform(int min, int max) {
         max = tmp;
     }
     /* rand() returns [0, RAND_MAX]; scale to [min, max] */
-    return min + rand() % (max - min + 1);
+    return min + rand() % (max - min + 1);  /* NOLINT */
 }
 
 double rng_normal(double mean, double stddev) {
@@ -33,16 +35,14 @@ double rng_normal(double mean, double stddev) {
      * produces a standard normal(0,1) random variable.
      * Then scale: result = mean + stddev * z0.
      */
-    double u1, u2, z0;
-
     /* Avoid log(0): keep generating until u1 > 0 */
+    double u1;
     do {
-        u1 = (double)rand() / (double)RAND_MAX;
+        u1 = (double)rand() / (double)RAND_MAX;  /* NOLINT */
     } while (u1 <= 0.0);
 
-    u2 = (double)rand() / (double)RAND_MAX;
-
-    z0 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
+    double u2 = (double)rand() / (double)RAND_MAX;  /* NOLINT */
+    double z0 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
 
     return mean + stddev * z0;
 }
@@ -52,6 +52,6 @@ int rng_bernoulli(double p) {
     if (p < 0.0) p = 0.0;
     if (p > 1.0) p = 1.0;
 
-    double u = (double)rand() / (double)RAND_MAX;
+    double u = (double)rand() / (double)RAND_MAX;  /* NOLINT */
     return (u < p) ? 1 : 0;
 }
