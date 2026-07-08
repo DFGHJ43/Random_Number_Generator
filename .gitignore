@@ -2,14 +2,13 @@
 *.o
 /obj/
 
-# Executables
-rng
-rng.exe
+# Executable
 rng-tui
 rng-tui.exe
 
 # Output files
 *.txt
+*.csv
 
 # IDE
 .idea/
