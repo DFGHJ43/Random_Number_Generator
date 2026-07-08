@@ -22,8 +22,6 @@
  * TUI lifecycle
  * ══════════════════════════════════════════════════════════ */
 
-//test
-
 void tui_init(TuiState *state) {
 #ifdef _WIN32
     term_enable_vt();
