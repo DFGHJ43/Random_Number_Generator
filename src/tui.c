@@ -589,12 +589,12 @@ static void draw_frame(TuiState *state) {
         state->graph_dirty = 0;
     }
 
-    /* Status message — middle column, below graph */
+    /* Status message — middle column, below graph (clip to MID_W-2) */
     term_goto(GRAPH_Y + GRAPH_H + 2, MID_X + 2);
     if (state->status[0] != '\0') {
-        printf("\033[1m%-30s\033[0m", state->status);
+        printf("\033[1m%-*s\033[0m", MID_W - 2, state->status);
     } else {
-        printf("%-30s", "");
+        printf("%-*s", MID_W - 2, "");
     }
 
     /* Bottom hint bar — spans full width */
@@ -683,7 +683,7 @@ static void do_generate(TuiState *state) {
     }
 
     snprintf(state->status, sizeof(state->status),
-             "Generated %d %s random numbers.",
+             "Gen %d %s numbers.",
              n,
              state->dist == DIST_NORMAL    ? "normal" :
              state->dist == DIST_BERNOULLI ? "bernoulli" :
@@ -693,7 +693,7 @@ static void do_generate(TuiState *state) {
 static void do_export(TuiState *state) {
     if (state->result_count == 0) {
         snprintf(state->status, sizeof(state->status),
-                 "Nothing to export. Generate some numbers first!");
+                 "Nothing to export!");
         return;
     }
 
@@ -707,7 +707,7 @@ static void do_export(TuiState *state) {
 
     if (output_file(state->results, state->result_count, fname) == 0) {
         snprintf(state->status, sizeof(state->status),
-                 "Exported %d numbers to %s", state->result_count, fname);
+                 "Exported %d to CSV.", state->result_count);
     } else {
         snprintf(state->status, sizeof(state->status),
                  "Export failed!");
@@ -752,7 +752,7 @@ void tui_run(void) {
             state.focus_field = FIELD_COUNT_NUM;
             state.graph_dirty = 1;
             snprintf(state.status, sizeof(state.status),
-                     "Switched to Uniform distribution.");
+                     "Switched to Uniform.");
             break;
 
         case 'n':
@@ -761,7 +761,7 @@ void tui_run(void) {
             state.focus_field = FIELD_COUNT_NUM;
             state.graph_dirty = 1;
             snprintf(state.status, sizeof(state.status),
-                     "Switched to Normal distribution.");
+                     "Switched to Normal.");
             break;
 
         case 'b':
@@ -770,7 +770,7 @@ void tui_run(void) {
             state.focus_field = FIELD_COUNT_NUM;
             state.graph_dirty = 1;
             snprintf(state.status, sizeof(state.status),
-                     "Switched to Bernoulli distribution.");
+                     "Switched to Bernoulli.");
             break;
 
         case 'g':
