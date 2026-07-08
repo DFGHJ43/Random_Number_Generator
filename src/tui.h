@@ -1,24 +1,32 @@
 #ifndef TUI_H
 #define TUI_H
 
-/* ── Terminal dimensions ─────────────────────────────── */
-#define TUI_MIN_ROWS  24
-#define TUI_MIN_COLS  80
+/* ── Terminal grid ────────────────────────────────────── */
+#define TERM_W  80
+#define TERM_H  24
 
-/* ── Layout geometry ─────────────────────────────────── */
-#define LEFT_X        2
-#define LEFT_W        22     /* enough for "Min:    [100         ]" */
-#define MID_DIV       25     /* divider between controls & graph */
-#define GRAPH_X       27
-#define GRAPH_W       26     /* graph area width */
-#define GRAPH_Y       5
-#define GRAPH_H       10
-#define RIGHT_DIV     54     /* divider between graph & results */
-#define RES_X         56
-#define RES_W         22
-#define STATUS_Y      (TUI_MIN_ROWS - 2)
+/* ── Column grid (strict, 0-indexed) ──────────────────── */
+/*  col 0=border, 1-22=controls, 23=div, 24-55=graph,
+    56=div, 57-78=results, 79=border                         */
+#define LEFT_X    1
+#define LEFT_W    22
+#define DIV1      23        /* LEFT_X + LEFT_W */
+#define MID_X     24        /* DIV1 + 1 */
+#define MID_W     32
+#define DIV2      56        /* MID_X + MID_W */
+#define RIGHT_X   57        /* DIV2 + 1 */
+#define RIGHT_W   22
 
-/* ── Input fields ────────────────────────────────────── */
+/* ── Graph inside middle panel ────────────────────────── */
+#define GRAPH_Y    4
+#define GRAPH_H    10
+#define GRAPH_PLOT_X  (MID_X + 2)   /* plot area start */
+#define GRAPH_PLOT_W  (MID_W - 4)   /* 28 data columns */
+
+/* ── Status bar ───────────────────────────────────────── */
+#define STATUS_Y  (TERM_H - 2)
+
+/* ── Input fields ─────────────────────────────────────── */
 #define FIELD_COUNT    6
 #define FIELD_BUF_LEN  32
 
@@ -31,14 +39,14 @@ typedef enum {
     FIELD_PROB
 } FieldId;
 
-/* ── Distribution type ───────────────────────────────── */
+/* ── Distribution type ────────────────────────────────── */
 typedef enum {
     DIST_UNIFORM    = 0,
     DIST_NORMAL     = 1,
     DIST_BERNOULLI  = 2
 } DistType;
 
-/* ── Main application state ──────────────────────────── */
+/* ── Main application state ───────────────────────────── */
 #define MAX_RESULTS 1000
 
 typedef struct {
@@ -71,7 +79,7 @@ typedef struct {
     int      graph_dirty;
 } TuiState;
 
-/* ── TUI API ─────────────────────────────────────────── */
+/* ── TUI API ──────────────────────────────────────────── */
 void tui_init(TuiState *state);
 void tui_restore(void);
 void tui_run(void);

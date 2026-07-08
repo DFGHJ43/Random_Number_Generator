@@ -185,20 +185,30 @@ static int read_key(void) {
  * Screen rendering
  * ══════════════════════════════════════════════════════════ */
 
-static void draw_box(int row, int col, int h, int w) {
-    /* top */
-    term_goto(row, col);      putchar('+');
-    for (int i = 0; i < w - 2; i++) putchar('-');
-    putchar('+');
-    /* sides */
-    for (int i = 1; i < h - 1; i++) {
-        term_goto(row + i, col);      putchar('|');
-        term_goto(row + i, col + w - 1); putchar('|');
+static void draw_box(void) {
+    /* Top border with T-junctions at dividers */
+    term_goto(0, 0);    putchar('+');
+    for (int c = 1; c <= 78; c++) {
+        if (c == DIV1 || c == DIV2) putchar('+');
+        else                        putchar('-');
     }
-    /* bottom */
-    term_goto(row + h - 1, col); putchar('+');
-    for (int i = 0; i < w - 2; i++) putchar('-');
-    putchar('+');
+    term_goto(0, 79);   putchar('+');
+
+    /* Left/right borders + dividers */
+    for (int r = 1; r <= TERM_H - 2; r++) {
+        term_goto(r, 0);    putchar('|');
+        term_goto(r, DIV1); putchar('|');
+        term_goto(r, DIV2); putchar('|');
+        term_goto(r, 79);   putchar('|');
+    }
+
+    /* Bottom border */
+    term_goto(TERM_H - 1, 0);  putchar('+');
+    for (int c = 1; c <= 78; c++) {
+        if (c == DIV1 || c == DIV2) putchar('+');
+        else                        putchar('-');
+    }
+    term_goto(TERM_H - 1, 79); putchar('+');
 }
 
 static void draw_str(int row, int col, const char *s) {
@@ -215,9 +225,9 @@ static void draw_str(int row, int col, const char *s) {
  * The PDF value is 1/(max-min), drawn as a constant-height bar.
  */
 static void draw_graph_uniform(const TuiState *state) {
-    int gx = GRAPH_X;
+    int gx = GRAPH_PLOT_X;
     int gy = GRAPH_Y;
-    int gw = GRAPH_W;
+    int gw = GRAPH_PLOT_W;
     int gh = GRAPH_H;
     int min = state->min_val;
     int max = state->max_val;
@@ -269,9 +279,9 @@ static void draw_graph_uniform(const TuiState *state) {
  * f(x) = 1/(sigma * sqrt(2*pi)) * exp(-(x-mu)^2 / (2*sigma^2))
  */
 static void draw_graph_normal(const TuiState *state) {
-    int gx = GRAPH_X;
+    int gx = GRAPH_PLOT_X;
     int gy = GRAPH_Y;
-    int gw = GRAPH_W;
+    int gw = GRAPH_PLOT_W;
     int gh = GRAPH_H;
     double mu = state->mean;
     double sigma = state->stddev;
@@ -337,9 +347,9 @@ static void draw_graph_normal(const TuiState *state) {
 }
 
 static void draw_graph_bernoulli(const TuiState *state) {
-    int gx = GRAPH_X;
+    int gx = GRAPH_PLOT_X;
     int gy = GRAPH_Y;
-    int gw = GRAPH_W;
+    int gw = GRAPH_PLOT_W;
     int gh = GRAPH_H;
     double p = state->prob;
 
@@ -408,8 +418,8 @@ static void draw_graph_bernoulli(const TuiState *state) {
 static void draw_graph(const TuiState *state) {
     /* Clear graph area */
     for (int row = GRAPH_Y - 1; row < GRAPH_Y + GRAPH_H + 3; row++) {
-        term_goto(row, GRAPH_X - 5);
-        for (int col = 0; col < GRAPH_W + 10; col++) putchar(' ');
+        term_goto(row, MID_X);
+        for (int col = 0; col < MID_W; col++) putchar(' ');
     }
 
     if (state->dist == DIST_NORMAL) {
@@ -511,14 +521,14 @@ static void draw_controls(TuiState *state) {
     printf("[ Quit     ]  Q");
 
     /* Clear any old cruft below buttons (previously results were here) */
-    for (int row = by + 3; row < TUI_MIN_ROWS - 2; row++) {
+    for (int row = by + 3; row < TERM_H - 1; row++) {
         term_goto(row, x);
         printf("%-18s", "");
     }
 }
 
 static void draw_results(TuiState *state) {
-    int x = RES_X;
+    int x = RIGHT_X;
     int y = 3;
     int max_show = 10;
 
@@ -555,50 +565,40 @@ static void draw_results(TuiState *state) {
  * ══════════════════════════════════════════════════════════ */
 
 static void draw_frame(TuiState *state) {
-    /* Note: NO term_clear() — each draw_*() manages its own area */
+    /* Outer box with T-junctions at dividers */
+    draw_box();
 
-    /* Outer box */
-    draw_box(0, 0, TUI_MIN_ROWS, TUI_MIN_COLS);
+    /* Title (centered on full width) */
+    term_goto(0, LEFT_X + 2);
+    printf("Random Number Generator");
 
-    /* Title */
-    term_goto(0, 3);
-    printf(" Random Number Generator ");
+    /* Column headers */
+    term_goto(2, MID_X + 2);
+    printf("Distribution Graph");
+    term_goto(2, RIGHT_X + 2);
+    printf("Results");
 
-    /* Vertical dividers: controls | graph | results */
-    for (int i = 1; i < TUI_MIN_ROWS - 1; i++) {
-        term_goto(i, MID_DIV);
-        putchar('|');
-        term_goto(i, RIGHT_DIV);
-        putchar('|');
-    }
-
-    /* Column labels */
-    term_goto(2, GRAPH_X + 2);
-    printf("--- Distribution Graph ---");
-    term_goto(2, RES_X + 2);
-    printf("--- Results ---");
-
-    /* Left, middle, right panels */
+    /* Panels */
     draw_controls(state);
     draw_results(state);
 
-    /* Only redraw graph when distribution or parameters change */
+    /* Graph: only when dirty */
     if (state->graph_dirty) {
         draw_graph(state);
         state->graph_dirty = 0;
     }
 
-    /* Status message — middle column, below the graph */
-    term_goto(GRAPH_Y + GRAPH_H + 3, GRAPH_X + 2);
+    /* Status message — middle column, below graph */
+    term_goto(GRAPH_Y + GRAPH_H + 2, MID_X + 2);
     if (state->status[0] != '\0') {
-        printf("\033[1m%s\033[0m", state->status);
+        printf("\033[1m%-30s\033[0m", state->status);
     } else {
         printf("%-30s", "");
     }
 
-    /* Bottom hint bar */
-    term_goto(STATUS_Y, 2);
-    printf("G=generate | U/N/B=distribution | Tab=edit | Arrows=scroll | Q=quit");
+    /* Bottom hint bar — spans full width */
+    term_goto(STATUS_Y, LEFT_X);
+    printf("%-78s", "G=generate | U/N/B=distribution | Tab=edit | Arrows=scroll | Q=quit");
 
     term_flush();
 }
