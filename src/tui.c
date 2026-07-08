@@ -420,7 +420,13 @@ static void draw_controls(TuiState *state) {
 static void draw_results(TuiState *state) {
     int x = LEFT_X;
     int y = 3 + 16;  /* below the divider */
-    int max_show = 8;
+    int max_show = 3;
+
+    /* Clear result area first (3 lines + optional hint line) */
+    for (int i = 0; i < 5; i++) {
+        term_goto(y + i, x);
+        printf("%-35s", "");
+    }
 
     if (state->result_count == 0) {
         draw_str(y, x, "(no results yet)");
@@ -440,7 +446,7 @@ static void draw_results(TuiState *state) {
 
     if (state->result_count > max_show) {
         term_goto(y + max_show, x);
-        printf("... (%d total, scroll with arrows)", state->result_count);
+        printf("... (%d total, arrows to scroll)", state->result_count);
     }
 }
 
@@ -652,17 +658,13 @@ void tui_run(void) {
         case KEY_UP:
             if (state.result_count > 0 && state.result_scroll > 0) {
                 state.result_scroll--;
-            } else {
-                state.focus_field = (state.focus_field + FIELD_COUNT - 1) % FIELD_COUNT;
             }
             break;
 
         case KEY_DOWN:
             if (state.result_count > 0
-                && state.result_scroll < state.result_count - 8) {
+                && state.result_scroll < state.result_count - 3) {
                 state.result_scroll++;
-            } else {
-                state.focus_field = (state.focus_field + 1) % FIELD_COUNT;
             }
             break;
 
