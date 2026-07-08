@@ -1,12 +1,12 @@
 CC       = gcc
-CFLAGS   = -Wall -Wextra -std=c99 -pedantic
+CFLAGS   = -Wall -Wextra -std=c99 -pedantic -Isrc
 LDFLAGS  = -lm
 
 SRC_DIR  = src
 OBJ_DIR  = obj
 TARGET   = rng-tui
 
-SRCS     = $(SRC_DIR)/tui.c $(SRC_DIR)/random.c $(SRC_DIR)/stats.c $(SRC_DIR)/output.c $(SRC_DIR)/graph/graph.c
+SRCS     = $(SRC_DIR)/tui.c $(SRC_DIR)/term.c $(SRC_DIR)/controls.c $(SRC_DIR)/random.c $(SRC_DIR)/stats.c $(SRC_DIR)/output.c $(SRC_DIR)/graph/graph.c
 OBJS     = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 .PHONY: all clean

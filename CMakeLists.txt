@@ -5,6 +5,8 @@ set(CMAKE_C_STANDARD 99)
 
 add_executable(rng-tui
     src/tui.c
+    src/term.c
+    src/controls.c
     src/random.c
     src/stats.c
     src/output.c
