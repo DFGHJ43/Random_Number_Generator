@@ -589,17 +589,13 @@ static void draw_frame(TuiState *state) {
         state->graph_dirty = 0;
     }
 
-    /* Status message — middle column, below graph (clip to MID_W-2) */
-    term_goto(GRAPH_Y + GRAPH_H + 2, MID_X + 2);
-    if (state->status[0] != '\0') {
-        printf("\033[1m%-*s\033[0m", MID_W - 2, state->status);
-    } else {
-        printf("%-*s", MID_W - 2, "");
-    }
-
-    /* Bottom hint bar — spans full width */
+    /* Status message — last content row, full width */
     term_goto(STATUS_Y, LEFT_X);
-    printf("%-78s", "G=generate | U/N/B=distribution | Tab=edit | Arrows=scroll | Q=quit");
+    if (state->status[0] != '\0') {
+        printf("\033[1m%-78s\033[0m", state->status);
+    } else {
+        printf("%-78s", "");
+    }
 
     term_flush();
 }

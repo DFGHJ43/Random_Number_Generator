@@ -18,7 +18,7 @@ int output_file(const double *numbers, int count, const char *filename) {
         fprintf(fp, "%g\n", numbers[i]);
     }
     fclose(fp);
-    printf("Output written to %s\n", filename);
+    /* TUI handles status display; stdout would corrupt the terminal */
     return 0;
 }
 
