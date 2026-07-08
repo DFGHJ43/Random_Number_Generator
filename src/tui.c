@@ -453,27 +453,34 @@ static void draw_controls(TuiState *state) {
     int x = LEFT_X;
     int y = 3;
 
-    /* Distribution selection */
+    /* Distribution selection (left-padded to LEFT_W) */
     term_goto(y, x);
-    printf("Distribution:");
+    printf("%-*s", LEFT_W, "Distribution:");
+
     term_goto(y + 1, x + 2);
-    if (state->dist == DIST_UNIFORM) {
+    if (state->dist == DIST_UNIFORM)
         printf("[*] Uniform");
-    } else {
-        printf("[ ] Uniform  (press U)");
-    }
+    else
+        printf("[ ] Uniform (U)");
+    /* pad this line */
+    term_goto(y + 1, x);
+    printf("%-*s", LEFT_W, "");  /* clears to end of row */
+
     term_goto(y + 2, x + 2);
-    if (state->dist == DIST_NORMAL) {
+    if (state->dist == DIST_NORMAL)
         printf("[*] Normal");
-    } else {
-        printf("[ ] Normal   (press N)");
-    }
+    else
+        printf("[ ] Normal (N)");
+    term_goto(y + 2, x);
+    printf("%-*s", LEFT_W, "");
+
     term_goto(y + 3, x + 2);
-    if (state->dist == DIST_BERNOULLI) {
+    if (state->dist == DIST_BERNOULLI)
         printf("[*] Bernoulli");
-    } else {
-        printf("[ ] Bernoulli (press B)");
-    }
+    else
+        printf("[ ] Bernoulli (B)");
+    term_goto(y + 3, x);
+    printf("%-*s", LEFT_W, "");
 
     /* Parameter fields — only show relevant ones for current distribution */
     const char *labels[FIELD_COUNT] = {
@@ -483,34 +490,33 @@ static void draw_controls(TuiState *state) {
     int ry = y + 6;
     for (int i = 0; i < FIELD_COUNT; i++) {
         if (!field_is_visible(i, state->dist)) {
-            /* Clear stale field text from previous distribution */
+            /* Clear stale field text */
             term_goto(ry, x);
-            printf("%-35s", "");
+            printf("%-*s", LEFT_W, "");
             ry++;
             continue;
         }
         term_goto(ry, x);
         printf("%s", labels[i]);
 
-        /* draw field background */
+        /* draw field: "[value]" at offset 10 */
         term_goto(ry, x + 10);
         printf("[");
-        if (i == state->focus_field) {
-            /* highlighted active field */
-            printf("\033[7m");  /* reverse video */
-        }
+        if (i == state->focus_field)
+            printf("\033[7m");
         printf("%-10s", state->field_buf[i]);
-        if (i == state->focus_field) {
-            printf("\033[0m");  /* reset */
-        }
+        if (i == state->focus_field)
+            printf("\033[0m");
         printf("]");
+
+        /* pad rest of row — must be same row, not ry+1 */
         ry++;
     }
 
-    /* Clear any remaining stale lines below the last visible field */
+    /* Clear any remaining stale lines */
     for (; ry < y + 12; ry++) {
         term_goto(ry, x);
-        printf("%-35s", "");
+        printf("%-*s", LEFT_W, "");
     }
 
     /* Buttons */
@@ -522,10 +528,10 @@ static void draw_controls(TuiState *state) {
     term_goto(by + 2, x);
     printf("[ Quit     ]  Q");
 
-    /* Clear any old cruft below buttons (previously results were here) */
+    /* Clear any old cruft below buttons */
     for (int row = by + 3; row < TERM_H - 1; row++) {
         term_goto(row, x);
-        printf("%-18s", "");
+        printf("%-*s", LEFT_W, "");
     }
 }
 
@@ -537,7 +543,7 @@ static void draw_results(TuiState *state) {
     /* Clear result area */
     for (int i = 0; i < 12; i++) {
         term_goto(y + i, x);
-        printf("%-22s", "");
+        printf("%-*s", RIGHT_W, "");
     }
 
     if (state->result_count == 0) {
