@@ -8,6 +8,7 @@ add_executable(rng-tui
     src/random.c
     src/stats.c
     src/output.c
+    src/graph/graph.c
 )
 
 target_link_libraries(rng-tui m)
