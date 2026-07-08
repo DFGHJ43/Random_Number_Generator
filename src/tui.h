@@ -7,14 +7,14 @@
 
 /* ── Layout geometry ─────────────────────────────────── */
 #define LEFT_X        2
-#define LEFT_W        18
-#define MID_DIV       21     /* divider between controls & graph */
-#define GRAPH_X       23
-#define GRAPH_W       30
+#define LEFT_W        22     /* enough for "Min:    [100         ]" */
+#define MID_DIV       25     /* divider between controls & graph */
+#define GRAPH_X       27
+#define GRAPH_W       26     /* graph area width */
 #define GRAPH_Y       5
 #define GRAPH_H       10
-#define RIGHT_DIV     55     /* divider between graph & results */
-#define RES_X         57
+#define RIGHT_DIV     54     /* divider between graph & results */
+#define RES_X         56
 #define RES_W         22
 #define STATUS_Y      (TUI_MIN_ROWS - 2)
 
