@@ -16,16 +16,12 @@ Zero external dependencies — uses only ANSI escape codes and the C standard li
 ## Build
 
 ```bash
-make
-```
-
-Or manually:
-
-```bash
 gcc -Wall -Wextra -std=c99 -pedantic -Isrc -o rng-tui \
     src/tui.c src/term.c src/controls.c src/random.c \
     src/stats.c src/output.c src/graph/graph.c -lm
 ```
+
+> Or `make` if you have it installed (uses the included Makefile).
 
 ## Usage
 
