@@ -1,7 +1,6 @@
 #include "tui.h"
 #include "graph/graph.h"
 #include "random.h"
-#include "stats.h"
 #include "output.h"
 
 #include <stdio.h>
@@ -212,11 +211,6 @@ static void draw_box(void) {
     term_goto(TERM_H - 1, 79); putchar('+');
 }
 
-static void draw_str(int row, int col, const char *s) {
-    term_goto(row, col);
-    printf("%s", s);
-}
-
 /* ══════════════════════════════════════════════════════════
  * Graph drawing
  * ══════════════════════════════════════════════════════════ */
@@ -268,7 +262,7 @@ static void draw_controls(TuiState *state) {
         printf("[ ] Bernoulli (B)");
 
     /* Parameter fields — only show relevant ones for current distribution */
-    const char *labels[FIELD_COUNT] = {
+    static const char *labels[FIELD_COUNT] = {
         "Count:  ", "Min:    ", "Max:    ", "Mean:   ", "StdDev: ", "Prob:   "
     };
 
@@ -320,7 +314,7 @@ static void draw_controls(TuiState *state) {
     }
 }
 
-static void draw_results(TuiState *state) {
+static void draw_results(const TuiState *state) {
     int x = RIGHT_X;
     int y = 3;
     int max_show = 10;
@@ -332,7 +326,8 @@ static void draw_results(TuiState *state) {
     }
 
     if (state->result_count == 0) {
-        draw_str(y + 1, x, "(no results)");
+        term_goto(y + 1, x);
+        printf("(no results)");
         return;
     }
 
@@ -426,12 +421,12 @@ static void field_backspace(FieldId fid, TuiState *state) {
 }
 
 static void parse_fields(TuiState *state) {
-    state->count  = atoi(state->field_buf[FIELD_COUNT_NUM]);
-    state->min_val= atoi(state->field_buf[FIELD_MIN]);
-    state->max_val= atoi(state->field_buf[FIELD_MAX]);
-    state->mean   = atof(state->field_buf[FIELD_MEAN]);
-    state->stddev = atof(state->field_buf[FIELD_STDDEV]);
-    state->prob   = atof(state->field_buf[FIELD_PROB]);
+    state->count  = (int)strtol(state->field_buf[FIELD_COUNT_NUM], NULL, 10);
+    state->min_val= (int)strtol(state->field_buf[FIELD_MIN],     NULL, 10);
+    state->max_val= (int)strtol(state->field_buf[FIELD_MAX],     NULL, 10);
+    state->mean   = strtod(state->field_buf[FIELD_MEAN],   NULL);
+    state->stddev = strtod(state->field_buf[FIELD_STDDEV], NULL);
+    state->prob   = strtod(state->field_buf[FIELD_PROB],   NULL);
 
     /* clamp */
     if (state->count < 1)  state->count = 1;
