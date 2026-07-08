@@ -456,7 +456,8 @@ static void draw_results(TuiState *state) {
  * ══════════════════════════════════════════════════════════ */
 
 static void draw_frame(TuiState *state) {
-    term_clear();
+    /* Note: NO term_clear() — each draw_*() manages its own area
+       so the graph survives when graph_dirty == 0 */
 
     /* Outer box */
     draw_box(0, 0, TUI_MIN_ROWS, TUI_MIN_COLS);
