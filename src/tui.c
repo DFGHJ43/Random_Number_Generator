@@ -487,7 +487,7 @@ static void draw_controls(TuiState *state) {
             /* highlighted active field */
             printf("\033[7m");  /* reverse video */
         }
-        printf("%-12s", state->field_buf[i]);
+        printf("%-10s", state->field_buf[i]);
         if (i == state->focus_field) {
             printf("\033[0m");  /* reset */
         }
