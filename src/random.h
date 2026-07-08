@@ -19,4 +19,10 @@ int rng_uniform(int min, int max);
  */
 double rng_normal(double mean, double stddev);
 
+/*
+ * Generate a Bernoulli-distributed random integer.
+ * Returns 1 with probability p, 0 with probability (1-p).
+ */
+int rng_bernoulli(double p);
+
 #endif /* RANDOM_H */

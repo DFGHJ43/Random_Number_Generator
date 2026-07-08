@@ -69,6 +69,7 @@ void tui_init(TuiState *state) {
     state->max_val      = 100;
     state->mean         = 0.0;
     state->stddev       = 1.0;
+    state->prob         = 0.5;
     state->result_count = 0;
     state->result_scroll= 0;
     state->focus_field  = FIELD_COUNT_NUM;
@@ -82,6 +83,7 @@ void tui_init(TuiState *state) {
     snprintf(state->field_buf[FIELD_MAX],     FIELD_BUF_LEN, "%d", state->max_val);
     snprintf(state->field_buf[FIELD_MEAN],    FIELD_BUF_LEN, "%.1f", state->mean);
     snprintf(state->field_buf[FIELD_STDDEV],  FIELD_BUF_LEN, "%.1f", state->stddev);
+    snprintf(state->field_buf[FIELD_PROB],    FIELD_BUF_LEN, "%.1f", state->prob);
 
     for (int i = 0; i < FIELD_COUNT; i++) {
         state->field_cursor[i] = (int)strlen(state->field_buf[i]);
@@ -339,6 +341,75 @@ static void draw_graph_normal(const TuiState *state) {
     printf("%.3f", pdf_max);
 }
 
+static void draw_graph_bernoulli(const TuiState *state) {
+    int gx = GRAPH_X;
+    int gy = GRAPH_Y;
+    int gw = GRAPH_W;
+    int gh = GRAPH_H;
+    double p = state->prob;
+
+    if (p < 0.0) p = 0.0;
+    if (p > 1.0) p = 1.0;
+
+    /* Y axis */
+    for (int i = 0; i <= gh; i++) {
+        term_goto(gy + gh - i, gx - 1);
+        putchar('|');
+    }
+    /* X axis */
+    term_goto(gy + gh, gx);
+    for (int i = 0; i < gw; i++) putchar('-');
+    term_goto(gy + gh, gx + gw);
+    putchar('>');
+
+    /* title */
+    term_goto(gy - 1, gx);
+    printf("Bernoulli PMF  p=%.2f", p);
+
+    /* Two bars at positions roughly 1/4 and 3/4 across the graph */
+    int bar0_x = gx + 4;                    /* bar for X=0 */
+    int bar1_x = gx + gw - 8;               /* bar for X=1 */
+    int bar_w  = 6;                         /* bar width */
+
+    int h0 = (int)((1.0 - p) * (double)(gh - 1) + 0.5);
+    int h1 = (int)(p * (double)(gh - 1) + 0.5);
+    if (h0 < 1) h0 = 1;
+    if (h1 < 1) h1 = 1;
+
+    /* Draw bar for 0 */
+    for (int row = 0; row < h0; row++) {
+        for (int col = 0; col < bar_w; col++) {
+            term_goto(gy + gh - 1 - row, bar0_x + col);
+            putchar('#');
+        }
+    }
+    /* Draw bar for 1 */
+    for (int row = 0; row < h1; row++) {
+        for (int col = 0; col < bar_w; col++) {
+            term_goto(gy + gh - 1 - row, bar1_x + col);
+            putchar('#');
+        }
+    }
+
+    /* X labels */
+    term_goto(gy + gh + 1, bar0_x + 2);
+    printf("0");
+    term_goto(gy + gh + 1, bar1_x + 2);
+    printf("1");
+
+    /* Y labels */
+    term_goto(gy, gx - 4);
+    printf("1.0");
+    term_goto(gy + gh, gx - 4);
+    printf("0.0");
+
+    /* Probability annotations on bars */
+    term_goto(gy + gh - h0 - 1, bar0_x);
+    printf("%.2f", 1.0 - p);
+    term_goto(gy + gh - h1 - 1, bar1_x);
+    printf("%.2f", p);
+}
+
 static void draw_graph(const TuiState *state) {
     /* Clear graph area */
     for (int row = GRAPH_Y - 1; row < GRAPH_Y + GRAPH_H + 3; row++) {
@@ -348,6 +419,8 @@ static void draw_graph(const TuiState *state) {
 
     if (state->dist == DIST_NORMAL) {
         draw_graph_normal(state);
+    } else if (state->dist == DIST_BERNOULLI) {
+        draw_graph_bernoulli(state);
     } else {
         draw_graph_uniform(state);
     }
@@ -376,12 +449,18 @@ static void draw_controls(TuiState *state) {
     } else {
         printf("[ ] Normal   (press N)");
     }
+    term_goto(y + 3, x + 2);
+    if (state->dist == DIST_BERNOULLI) {
+        printf("[*] Bernoulli");
+    } else {
+        printf("[ ] Bernoulli (press B)");
+    }
 
     /* Parameter fields */
     const char *labels[FIELD_COUNT] = {
-        "Count:  ", "Min:    ", "Max:    ", "Mean:   ", "StdDev: "
+        "Count:  ", "Min:    ", "Max:    ", "Mean:   ", "StdDev: ", "Prob:   "
     };
-    int field_rows[FIELD_COUNT] = { 5, 6, 7, 8, 9 };
+    int field_rows[FIELD_COUNT] = { 6, 7, 8, 9, 10, 11 };
 
     for (int i = 0; i < FIELD_COUNT; i++) {
         int ry = y + field_rows[i];
@@ -403,7 +482,7 @@ static void draw_controls(TuiState *state) {
     }
 
     /* Buttons */
-    int by = y + 11;
+    int by = y + 13;
     term_goto(by, x);
     printf("[ Generate ]  press G");
     term_goto(by + 1, x);
@@ -412,7 +491,7 @@ static void draw_controls(TuiState *state) {
     printf("[ Quit ]       press Q");
 
     /* Divider */
-    int ry = y + 15;
+    int ry = y + 17;
     draw_h_line(ry, x, LEFT_WIDTH);
     term_goto(ry, x);
     printf("--- Results ---");
@@ -420,7 +499,7 @@ static void draw_controls(TuiState *state) {
 
 static void draw_results(TuiState *state) {
     int x = LEFT_X;
-    int y = 3 + 16;  /* below the divider */
+    int y = 3 + 18;  /* below the divider */
     int max_show = 3;
 
     /* Clear result area first (3 lines + optional hint line) */
@@ -541,10 +620,13 @@ static void parse_fields(TuiState *state) {
     state->max_val= atoi(state->field_buf[FIELD_MAX]);
     state->mean   = atof(state->field_buf[FIELD_MEAN]);
     state->stddev = atof(state->field_buf[FIELD_STDDEV]);
+    state->prob   = atof(state->field_buf[FIELD_PROB]);
 
     /* clamp */
     if (state->count < 1)  state->count = 1;
     if (state->count > MAX_RESULTS) state->count = MAX_RESULTS;
+    if (state->prob < 0.0) state->prob = 0.0;
+    if (state->prob > 1.0) state->prob = 1.0;
     if (state->stddev <= 0.0) state->stddev = 1.0;
 }
 
@@ -567,6 +649,10 @@ static void do_generate(TuiState *state) {
         for (int i = 0; i < n; i++) {
             state->results[i] = rng_normal(state->mean, state->stddev);
         }
+    } else if (state->dist == DIST_BERNOULLI) {
+        for (int i = 0; i < n; i++) {
+            state->results[i] = (double)rng_bernoulli(state->prob);
+        }
     } else {
         for (int i = 0; i < n; i++) {
             state->results[i] = (double)rng_uniform(state->min_val, state->max_val);
@@ -575,7 +661,10 @@ static void do_generate(TuiState *state) {
 
     snprintf(state->status, sizeof(state->status),
              "Generated %d %s random numbers.",
-             n, state->dist == DIST_NORMAL ? "normal" : "uniform");
+             n,
+             state->dist == DIST_NORMAL    ? "normal" :
+             state->dist == DIST_BERNOULLI ? "bernoulli" :
+                                             "uniform");
 }
 
 static void do_export(TuiState *state) {
@@ -648,6 +737,14 @@ void tui_run(void) {
             state.graph_dirty = 1;
             snprintf(state.status, sizeof(state.status),
                      "Switched to Normal distribution.");
+            break;
+
+        case 'b':
+        case 'B':
+            state.dist = DIST_BERNOULLI;
+            state.graph_dirty = 1;
+            snprintf(state.status, sizeof(state.status),
+                     "Switched to Bernoulli distribution.");
             break;
 
         case 'g':

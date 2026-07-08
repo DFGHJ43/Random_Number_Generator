@@ -17,7 +17,7 @@
 #define STATUS_Y      (TUI_MIN_ROWS - 2)
 
 /* ── Input fields ────────────────────────────────────── */
-#define FIELD_COUNT    5
+#define FIELD_COUNT    6
 #define FIELD_BUF_LEN  32
 
 typedef enum {
@@ -25,13 +25,15 @@ typedef enum {
     FIELD_MIN,
     FIELD_MAX,
     FIELD_MEAN,
-    FIELD_STDDEV
+    FIELD_STDDEV,
+    FIELD_PROB
 } FieldId;
 
 /* ── Distribution type ───────────────────────────────── */
 typedef enum {
-    DIST_UNIFORM = 0,
-    DIST_NORMAL  = 1
+    DIST_UNIFORM    = 0,
+    DIST_NORMAL     = 1,
+    DIST_BERNOULLI  = 2
 } DistType;
 
 /* ── Main application state ──────────────────────────── */
@@ -45,6 +47,7 @@ typedef struct {
     int      max_val;
     double   mean;
     double   stddev;
+    double   prob;
 
     /* results */
     double   results[MAX_RESULTS];

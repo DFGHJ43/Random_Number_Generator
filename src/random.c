@@ -46,3 +46,12 @@ double rng_normal(double mean, double stddev) {
 
     return mean + stddev * z0;
 }
+
+int rng_bernoulli(double p) {
+    /* Clamp p to [0, 1] */
+    if (p < 0.0) p = 0.0;
+    if (p > 1.0) p = 1.0;
+
+    double u = (double)rand() / (double)RAND_MAX;
+    return (u < p) ? 1 : 0;
+}
