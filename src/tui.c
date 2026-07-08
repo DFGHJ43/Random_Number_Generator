@@ -430,6 +430,18 @@ static void draw_graph(const TuiState *state) {
  * Left panel: controls + results
  * ══════════════════════════════════════════════════════════ */
 
+static int field_is_visible(int fid, DistType dist) {
+    switch (dist) {
+    case DIST_UNIFORM:
+        return fid == FIELD_COUNT_NUM || fid == FIELD_MIN || fid == FIELD_MAX;
+    case DIST_NORMAL:
+        return fid == FIELD_COUNT_NUM || fid == FIELD_MEAN || fid == FIELD_STDDEV;
+    case DIST_BERNOULLI:
+        return fid == FIELD_COUNT_NUM || fid == FIELD_PROB;
+    }
+    return 0;
+}
+
 static void draw_controls(TuiState *state) {
     int x = LEFT_X;
     int y = 3;
@@ -456,14 +468,20 @@ static void draw_controls(TuiState *state) {
         printf("[ ] Bernoulli (press B)");
     }
 
-    /* Parameter fields */
+    /* Parameter fields — only show relevant ones for current distribution */
     const char *labels[FIELD_COUNT] = {
         "Count:  ", "Min:    ", "Max:    ", "Mean:   ", "StdDev: ", "Prob:   "
     };
-    int field_rows[FIELD_COUNT] = { 6, 7, 8, 9, 10, 11 };
 
+    int ry = y + 6;
     for (int i = 0; i < FIELD_COUNT; i++) {
-        int ry = y + field_rows[i];
+        if (!field_is_visible(i, state->dist)) {
+            /* Clear stale field text from previous distribution */
+            term_goto(ry, x);
+            printf("%-35s", "");
+            ry++;
+            continue;
+        }
         term_goto(ry, x);
         printf("%s", labels[i]);
 
@@ -479,6 +497,13 @@ static void draw_controls(TuiState *state) {
             printf("\033[0m");  /* reset */
         }
         printf("]");
+        ry++;
+    }
+
+    /* Clear any remaining stale lines below the last visible field */
+    for (; ry < y + 12; ry++) {
+        term_goto(ry, x);
+        printf("%-35s", "");
     }
 
     /* Buttons */
@@ -491,9 +516,9 @@ static void draw_controls(TuiState *state) {
     printf("[ Quit ]       press Q");
 
     /* Divider */
-    int ry = y + 17;
-    draw_h_line(ry, x, LEFT_WIDTH);
-    term_goto(ry, x);
+    int divider_y = y + 17;
+    draw_h_line(divider_y, x, LEFT_WIDTH);
+    term_goto(divider_y, x);
     printf("--- Results ---");
 }
 
@@ -726,6 +751,7 @@ void tui_run(void) {
         case 'u':
         case 'U':
             state.dist = DIST_UNIFORM;
+            state.focus_field = FIELD_COUNT_NUM;
             state.graph_dirty = 1;
             snprintf(state.status, sizeof(state.status),
                      "Switched to Uniform distribution.");
@@ -734,6 +760,7 @@ void tui_run(void) {
         case 'n':
         case 'N':
             state.dist = DIST_NORMAL;
+            state.focus_field = FIELD_COUNT_NUM;
             state.graph_dirty = 1;
             snprintf(state.status, sizeof(state.status),
                      "Switched to Normal distribution.");
@@ -742,6 +769,7 @@ void tui_run(void) {
         case 'b':
         case 'B':
             state.dist = DIST_BERNOULLI;
+            state.focus_field = FIELD_COUNT_NUM;
             state.graph_dirty = 1;
             snprintf(state.status, sizeof(state.status),
                      "Switched to Bernoulli distribution.");
@@ -757,8 +785,10 @@ void tui_run(void) {
             do_export(&state);
             break;
 
-        case '\t':  /* Tab: cycle focus */
-            state.focus_field = (state.focus_field + 1) % FIELD_COUNT;
+        case '\t':  /* Tab: cycle focus (skip invisible fields) */
+            do {
+                state.focus_field = (state.focus_field + 1) % FIELD_COUNT;
+            } while (!field_is_visible(state.focus_field, state.dist));
             break;
 
         case KEY_UP:
@@ -792,7 +822,9 @@ void tui_run(void) {
         case 127:  /* backspace (127 == 0x7f on some terminals) */
             field_backspace((FieldId)state.focus_field, &state);
             parse_fields(&state);
-            state.graph_dirty = 1;
+            if (field_is_visible(state.focus_field, state.dist)) {
+                state.graph_dirty = 1;
+            }
             break;
 
         default:
@@ -800,7 +832,9 @@ void tui_run(void) {
             if ((key >= '0' && key <= '9') || key == '-' || key == '.') {
                 field_insert((FieldId)state.focus_field, &state, (char)key);
                 parse_fields(&state);
-                state.graph_dirty = 1;
+                if (field_is_visible(state.focus_field, state.dist)) {
+                    state.graph_dirty = 1;
+                }
             }
             break;
         }
