@@ -270,7 +270,9 @@ static void draw_graph_uniform(const TuiState *state) {
 
     /* Y label */
     double pdf_val = 1.0 / (max - min);
-    term_goto(gy, gx - 4);
+    term_goto(gy, MID_X);
+    printf("%4s", "");
+    term_goto(gy, MID_X);
     printf("%.2f", pdf_val);
 }
 
@@ -342,7 +344,7 @@ static void draw_graph_normal(const TuiState *state) {
     }
 
     /* Y label (peak) */
-    term_goto(gy, gx - 5);
+    term_goto(gy, MID_X);
     printf("%.3f", pdf_max);
 }
 
@@ -403,9 +405,9 @@ static void draw_graph_bernoulli(const TuiState *state) {
     printf("1");
 
     /* Y labels */
-    term_goto(gy, gx - 4);
+    term_goto(gy, MID_X);
     printf("1.0");
-    term_goto(gy + gh, gx - 4);
+    term_goto(gy + gh, MID_X);
     printf("0.0");
 
     /* Probability annotations on bars */
