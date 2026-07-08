@@ -1,3 +1,7 @@
+/*
+ * controls.h — 控制面板与字段编辑接口
+ */
+
 #ifndef CONTROLS_H
 #define CONTROLS_H
 

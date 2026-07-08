@@ -1,3 +1,7 @@
+/*
+ * stats.h — 统计计算接口
+ */
+
 #ifndef STATS_H
 #define STATS_H
 

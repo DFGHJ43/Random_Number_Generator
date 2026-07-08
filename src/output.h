@@ -1,3 +1,7 @@
+/*
+ * output.h — 输出接口
+ */
+
 #ifndef OUTPUT_H
 #define OUTPUT_H
 

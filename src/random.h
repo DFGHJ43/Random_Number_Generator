@@ -1,3 +1,7 @@
+/*
+ * random.h — 随机数生成接口
+ */
+
 #ifndef RANDOM_H
 #define RANDOM_H
 

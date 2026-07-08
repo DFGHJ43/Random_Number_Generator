@@ -1,3 +1,9 @@
+/*
+ * term.h — 终端控制与键盘输入接口
+ *
+ * term_* : 终端 ANSI 操作  |  kb_* / read_key / KEY_* : 键盘读取
+ */
+
 #ifndef TERMINAL_H
 #define TERMINAL_H
 

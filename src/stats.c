@@ -1,3 +1,10 @@
+/*
+ * stats.c — 统计量计算
+ *
+ * stats_compute(data,count): 计算最小值、最大值、均值、标准差
+ * 返回 StatsResult{min,max,mean,stddev,count}
+ */
+
 #include "stats.h"
 
 #include <math.h>

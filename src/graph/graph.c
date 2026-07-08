@@ -1,3 +1,14 @@
+/*
+ * graph.c — 分布函数 ASCII 图形绘制
+ *
+ * draw_graph: 清空图形区并分发到具体分布
+ * draw_graph_uniform: 均匀分布 — 等高铁丝矩形
+ * draw_graph_normal: 正态分布 — Box-Muller PDF 钟形曲线(28列采样)
+ * draw_graph_bernoulli: 伯努利分布 — 双柱 PMF(P(0)=1-p, P(1)=p)
+ *
+ * 绘制区: GRAPH_PLOT_X..GRAPH_PLOT_X+GRAPH_PLOT_W, GRAPH_Y..GRAPH_Y+GRAPH_H
+ */
+
 #include "graph.h"
 
 #include <math.h>

@@ -1,3 +1,9 @@
+/*
+ * graph.h — 分布图形绘制接口
+ *
+ * draw_graph: 清图+分发  |  draw_graph_*: 各分布具体绘制
+ */
+
 #ifndef GRAPH_MODULE_H
 #define GRAPH_MODULE_H
 

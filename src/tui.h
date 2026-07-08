@@ -1,3 +1,13 @@
+/*
+ * tui.h — 布局常量、字段枚举、分布类型、应用状态 TuiState 定义
+ *
+ * 栅格列: LEFT_X/W=1/22  DIV1=23  MID_X/W=24/32  DIV2=56  RIGHT_X/W=57/22
+ * TuiState: dist(分布类型) count/min_val/max_val/mean/stddev/prob(参数)
+ *           results[] result_count/scroll(结果与滚动)
+ *           focus_field field_buf[][] field_cursor[](输入编辑)
+ *           status[](状态消息) graph_dirty(脏标记)
+ */
+
 #ifndef TUI_H
 #define TUI_H
 

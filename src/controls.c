@@ -1,3 +1,12 @@
+/*
+ * controls.c — 左侧控制面板渲染 + 字段编辑逻辑
+ *
+ * draw_controls: 分布选择器(Uniform/Normal/Bernoulli) + 参数字段 + 按钮
+ * field_insert/backspace: 字段缓冲区插入/删除字符
+ * parse_fields: 字段缓冲区 -> 数值变量(strtol/strtod)
+ * field_is_visible: 根据当前分布判断字段是否可见
+ */
+
 #include "controls.h"
 #include "term.h"
 

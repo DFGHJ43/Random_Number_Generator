@@ -1,3 +1,12 @@
+/*
+ * random.c — 随机数生成核心(基于 C 标准库 rand())
+ *
+ * rng_init(seed): 初始化种子，seed=0 时使用 time(NULL)
+ * rng_uniform(min,max): 均匀分布整数 [min, max]
+ * rng_normal(mean,stddev): 正态分布(Box-Muller 变换)
+ * rng_bernoulli(p): 伯努利分布，概率 p 返回 1，否则 0
+ */
+
 #include "random.h"
 
 #include <math.h>
