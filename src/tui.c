@@ -473,13 +473,18 @@ static void draw_frame(TuiState *state) {
     draw_results(state);
     draw_graph(state);
 
-    /* Status bar */
-    term_goto(STATUS_Y, 2);
+    /* Status message — right side, below the graph */
+    term_goto(GRAPH_Y + GRAPH_H + 3, RIGHT_X + 2);
     if (state->status[0] != '\0') {
-        printf("%s", state->status);
+        printf("\033[1m%s\033[0m", state->status);  /* bold for visibility */
     } else {
-        printf("Press G to generate | U/N to switch distribution | Tab to edit fields | Q to quit");
+        /* clear any stale message */
+        printf("%-35s", "");
     }
+
+    /* Bottom hint bar — always show key bindings */
+    term_goto(STATUS_Y, 2);
+    printf("Press G to generate | U/N to switch distribution | Tab to edit fields | Q to quit");
 
     term_flush();
 }
