@@ -14,3 +14,4 @@ rng-tui.exe
 # IDE
 .idea/
 .vscode/
+.claude/
