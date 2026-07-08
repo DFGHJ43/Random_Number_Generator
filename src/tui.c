@@ -73,6 +73,7 @@ void tui_init(TuiState *state) {
     state->result_scroll= 0;
     state->focus_field  = FIELD_COUNT_NUM;
     state->running      = 1;
+    state->graph_dirty  = 1;  /* first render */
     state->status[0]    = '\0';
 
     /* init field buffers */
@@ -477,7 +478,12 @@ static void draw_frame(TuiState *state) {
     /* Left side controls */
     draw_controls(state);
     draw_results(state);
-    draw_graph(state);
+
+    /* Only redraw graph when distribution or parameters change */
+    if (state->graph_dirty) {
+        draw_graph(state);
+        state->graph_dirty = 0;
+    }
 
     /* Status message — right side, below the graph */
     term_goto(GRAPH_Y + GRAPH_H + 3, RIGHT_X + 2);
@@ -630,6 +636,7 @@ void tui_run(void) {
         case 'u':
         case 'U':
             state.dist = DIST_UNIFORM;
+            state.graph_dirty = 1;
             snprintf(state.status, sizeof(state.status),
                      "Switched to Uniform distribution.");
             break;
@@ -637,6 +644,7 @@ void tui_run(void) {
         case 'n':
         case 'N':
             state.dist = DIST_NORMAL;
+            state.graph_dirty = 1;
             snprintf(state.status, sizeof(state.status),
                      "Switched to Normal distribution.");
             break;
@@ -686,6 +694,7 @@ void tui_run(void) {
         case 127:  /* backspace (127 == 0x7f on some terminals) */
             field_backspace((FieldId)state.focus_field, &state);
             parse_fields(&state);
+            state.graph_dirty = 1;
             break;
 
         default:
@@ -693,6 +702,7 @@ void tui_run(void) {
             if ((key >= '0' && key <= '9') || key == '-' || key == '.') {
                 field_insert((FieldId)state.focus_field, &state, (char)key);
                 parse_fields(&state);
+                state.graph_dirty = 1;
             }
             break;
         }
