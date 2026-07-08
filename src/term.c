@@ -1,9 +1,9 @@
 /*
- * term.c — 终端控制(ANSI转义序列) + 键盘输入(阻塞/非阻塞)
+ * term.c — Terminal control (ANSI escapes) + keyboard input
  *
- * term_*: 清屏、光标定位、显示/隐藏光标、VT模式启用
- * kb_hit/kb_get/read_key: 跨平台键盘读取(Windows conio / Unix termios)
- * KEY_UP/DOWN/LEFT/RIGHT/ESC: 特殊键码(256+)
+ * term_*: clear screen, cursor positioning, show/hide cursor, VT enable
+ * kb_hit/kb_get/read_key: cross-platform key reads (Windows conio / Unix termios)
+ * KEY_UP/DOWN/LEFT/RIGHT/ESC: special key codes (256+)
  */
 
 #include "term.h"

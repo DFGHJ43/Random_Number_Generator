@@ -1,5 +1,5 @@
 /*
- * random.h — 随机数生成接口
+ * random.h — Random number generation interface
  */
 
 #ifndef RANDOM_H

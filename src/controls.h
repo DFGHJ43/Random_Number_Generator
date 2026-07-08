@@ -1,5 +1,5 @@
 /*
- * controls.h — 控制面板与字段编辑接口
+ * controls.h — Controls panel & field editing interface
  */
 
 #ifndef CONTROLS_H

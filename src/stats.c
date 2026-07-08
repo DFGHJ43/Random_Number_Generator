@@ -1,8 +1,8 @@
 /*
- * stats.c — 统计量计算
+ * stats.c — Statistics computation
  *
- * stats_compute(data,count): 计算最小值、最大值、均值、标准差
- * 返回 StatsResult{min,max,mean,stddev,count}
+ * stats_compute(data,count): computes min, max, mean, stddev
+ * Returns StatsResult{min, max, mean, stddev, count}
  */
 
 #include "stats.h"

@@ -1,12 +1,12 @@
 /*
- * graph.c — 分布函数 ASCII 图形绘制
+ * graph.c — ASCII graph rendering for distribution PDFs/PMFs
  *
- * draw_graph: 清空图形区并分发到具体分布
- * draw_graph_uniform: 均匀分布 — 等高铁丝矩形
- * draw_graph_normal: 正态分布 — Box-Muller PDF 钟形曲线(28列采样)
- * draw_graph_bernoulli: 伯努利分布 — 双柱 PMF(P(0)=1-p, P(1)=p)
+ * draw_graph: clear graph area and dispatch to specific distribution
+ * draw_graph_uniform: flat bar (constant PDF = 1/(max-min))
+ * draw_graph_normal: bell curve via Box-Muller PDF (28 sample columns)
+ * draw_graph_bernoulli: dual-bar PMF (P(0)=1-p, P(1)=p)
  *
- * 绘制区: GRAPH_PLOT_X..GRAPH_PLOT_X+GRAPH_PLOT_W, GRAPH_Y..GRAPH_Y+GRAPH_H
+ * Plot area: GRAPH_PLOT_X..+GRAPH_PLOT_W,  GRAPH_Y..+GRAPH_H
  */
 
 #include "graph.h"

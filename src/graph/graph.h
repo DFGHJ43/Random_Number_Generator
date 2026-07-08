@@ -1,7 +1,7 @@
 /*
- * graph.h — 分布图形绘制接口
+ * graph.h — Distribution graph rendering interface
  *
- * draw_graph: 清图+分发  |  draw_graph_*: 各分布具体绘制
+ * draw_graph: clear + dispatch  |  draw_graph_*: per-distribution renderers
  */
 
 #ifndef GRAPH_MODULE_H

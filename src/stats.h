@@ -1,5 +1,5 @@
 /*
- * stats.h — 统计计算接口
+ * stats.h — Statistics computation interface
  */
 
 #ifndef STATS_H

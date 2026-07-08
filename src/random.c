@@ -1,10 +1,10 @@
 /*
- * random.c — 随机数生成核心(基于 C 标准库 rand())
+ * random.c — Random number generation (based on C stdlib rand())
  *
- * rng_init(seed): 初始化种子，seed=0 时使用 time(NULL)
- * rng_uniform(min,max): 均匀分布整数 [min, max]
- * rng_normal(mean,stddev): 正态分布(Box-Muller 变换)
- * rng_bernoulli(p): 伯努利分布，概率 p 返回 1，否则 0
+ * rng_init(seed): init seed, uses time(NULL) when seed=0
+ * rng_uniform(min,max): uniform integer in [min, max]
+ * rng_normal(mean,stddev): normal via Box-Muller transform
+ * rng_bernoulli(p): Bernoulli, returns 1 with probability p, else 0
  */
 
 #include "random.h"

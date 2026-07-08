@@ -1,5 +1,5 @@
 /*
- * output.h — 输出接口
+ * output.h — Output interface
  */
 
 #ifndef OUTPUT_H

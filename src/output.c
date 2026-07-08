@@ -1,9 +1,9 @@
 /*
- * output.c — 输出功能
+ * output.c — Output functions
  *
- * output_console: 打印数字到控制台(CLI 模式使用)
- * output_file: 写入数字到文件(CSV 导出)
- * output_stats: 打印统计摘要(CLI 模式使用)
+ * output_console: print numbers to stdout (CLI mode)
+ * output_file: write numbers to file (CSV export)
+ * output_stats: print statistics summary (CLI mode)
  */
 
 #include "output.h"

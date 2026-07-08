@@ -1,8 +1,9 @@
 /*
- * tui.c — 随机数生成器 TUI 主控模块
+ * tui.c — RNG TUI main module
  *
- * 事件循环、画面组合（外框+三栏）、结果面板、生成/导出操作。
- * 不包含终端控制(term.c)、控制面板(controls.c)、图形(graph.c)。
+ * Event loop, frame compositing (box + three columns),
+ * results panel, generate/export actions.
+ * Terminal control -> term.c, controls -> controls.c, graph -> graph.c.
  */
 
 #include "tui.h"
