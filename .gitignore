@@ -1,0 +1,13 @@
+# Object files
+*.o
+
+# Executable
+rng
+rng.exe
+
+# Output files
+*.txt
+
+# IDE
+.idea/
+.vscode/
