@@ -8,6 +8,7 @@ rng-tui.exe
 
 # Output files
 *.txt
+!CMakeLists.txt
 *.csv
 
 # IDE
