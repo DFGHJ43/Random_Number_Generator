@@ -23,7 +23,7 @@ make
 ./rng -n 5 -l 1 -u 100
 
 # Generate 1000 normal random numbers with mean=50, stddev=10, show stats
-./rng -n 1000 -d normal -m 50 -s 10 --stats
+./rng -n 1000 -d normal -m 50 -v 10 --stats
 
 # Generate 100 uniform random numbers and save to file
 ./rng -n 100 -l 0 -u 999 -o output.txt
@@ -41,9 +41,11 @@ make
 | `-u <max>` | Upper bound for uniform distribution (default: 100) |
 | `-d <dist>` | Distribution: `uniform` (default) or `normal` |
 | `-m <mean>` | Mean for normal distribution (default: 0) |
-| `-s <value>` | Standard deviation (normal) or seed value |
+| `-s <seed>` | Random seed for reproducible results |
+| `-v <stddev>` | Standard deviation for normal distribution (default: 1.0) |
 | `-o <file>` | Output file path |
 | `--stats` | Print statistical summary |
+| `-h` | Show help message |
 
 ## License
 
