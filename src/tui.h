@@ -7,13 +7,15 @@
 
 /* ── Layout geometry ─────────────────────────────────── */
 #define LEFT_X        2
-#define LEFT_WIDTH    38
-#define RIGHT_X       42
-#define RIGHT_WIDTH   36
-#define GRAPH_X       (RIGHT_X + 2)
-#define GRAPH_Y       5
+#define LEFT_W        18
+#define MID_DIV       21     /* divider between controls & graph */
+#define GRAPH_X       23
 #define GRAPH_W       30
+#define GRAPH_Y       5
 #define GRAPH_H       10
+#define RIGHT_DIV     55     /* divider between graph & results */
+#define RES_X         57
+#define RES_W         22
 #define STATUS_Y      (TUI_MIN_ROWS - 2)
 
 /* ── Input fields ────────────────────────────────────── */

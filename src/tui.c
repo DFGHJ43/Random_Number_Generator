@@ -185,11 +185,6 @@ static int read_key(void) {
  * Screen rendering
  * ══════════════════════════════════════════════════════════ */
 
-static void draw_h_line(int row, int col, int len) {
-    term_goto(row, col);
-    for (int i = 0; i < len; i++) putchar('-');
-}
-
 static void draw_box(int row, int col, int h, int w) {
     /* top */
     term_goto(row, col);      putchar('+');
@@ -509,32 +504,32 @@ static void draw_controls(TuiState *state) {
     /* Buttons */
     int by = y + 13;
     term_goto(by, x);
-    printf("[ Generate ]  press G");
+    printf("[ Generate ]  G");
     term_goto(by + 1, x);
-    printf("[ Export CSV ] press E");
+    printf("[ Export   ]  E");
     term_goto(by + 2, x);
-    printf("[ Quit ]       press Q");
+    printf("[ Quit     ]  Q");
 
-    /* Divider */
-    int divider_y = y + 17;
-    draw_h_line(divider_y, x, LEFT_WIDTH);
-    term_goto(divider_y, x);
-    printf("--- Results ---");
+    /* Clear any old cruft below buttons (previously results were here) */
+    for (int row = by + 3; row < TUI_MIN_ROWS - 2; row++) {
+        term_goto(row, x);
+        printf("%-18s", "");
+    }
 }
 
 static void draw_results(TuiState *state) {
-    int x = LEFT_X;
-    int y = 3 + 18;  /* below the divider */
-    int max_show = 3;
+    int x = RES_X;
+    int y = 3;
+    int max_show = 10;
 
-    /* Clear result area first (3 lines + optional hint line) */
-    for (int i = 0; i < 5; i++) {
+    /* Clear result area */
+    for (int i = 0; i < 12; i++) {
         term_goto(y + i, x);
-        printf("%-35s", "");
+        printf("%-22s", "");
     }
 
     if (state->result_count == 0) {
-        draw_str(y, x, "(no results yet)");
+        draw_str(y + 1, x, "(no results)");
         return;
     }
 
@@ -545,13 +540,13 @@ static void draw_results(TuiState *state) {
     if (start < 0) start = 0;
 
     for (int i = 0; i < max_show && (start + i) < state->result_count; i++) {
-        term_goto(y + i, x);
+        term_goto(y + i + 1, x);
         printf("%3d: %g", start + i + 1, state->results[start + i]);
     }
 
     if (state->result_count > max_show) {
-        term_goto(y + max_show, x);
-        printf("... (%d total, arrows to scroll)", state->result_count);
+        term_goto(y + max_show + 2, x);
+        printf("(%d total, arrows)", state->result_count);
     }
 }
 
@@ -560,8 +555,7 @@ static void draw_results(TuiState *state) {
  * ══════════════════════════════════════════════════════════ */
 
 static void draw_frame(TuiState *state) {
-    /* Note: NO term_clear() — each draw_*() manages its own area
-       so the graph survives when graph_dirty == 0 */
+    /* Note: NO term_clear() — each draw_*() manages its own area */
 
     /* Outer box */
     draw_box(0, 0, TUI_MIN_ROWS, TUI_MIN_COLS);
@@ -570,17 +564,21 @@ static void draw_frame(TuiState *state) {
     term_goto(0, 3);
     printf(" Random Number Generator ");
 
-    /* Vertical divider */
+    /* Vertical dividers: controls | graph | results */
     for (int i = 1; i < TUI_MIN_ROWS - 1; i++) {
-        term_goto(i, RIGHT_X - 1);
+        term_goto(i, MID_DIV);
+        putchar('|');
+        term_goto(i, RIGHT_DIV);
         putchar('|');
     }
 
-    /* Right side label */
-    term_goto(2, RIGHT_X + 2);
+    /* Column labels */
+    term_goto(2, GRAPH_X + 2);
     printf("--- Distribution Graph ---");
+    term_goto(2, RES_X + 2);
+    printf("--- Results ---");
 
-    /* Left side controls */
+    /* Left, middle, right panels */
     draw_controls(state);
     draw_results(state);
 
@@ -590,18 +588,17 @@ static void draw_frame(TuiState *state) {
         state->graph_dirty = 0;
     }
 
-    /* Status message — right side, below the graph */
-    term_goto(GRAPH_Y + GRAPH_H + 3, RIGHT_X + 2);
+    /* Status message — middle column, below the graph */
+    term_goto(GRAPH_Y + GRAPH_H + 3, GRAPH_X + 2);
     if (state->status[0] != '\0') {
-        printf("\033[1m%s\033[0m", state->status);  /* bold for visibility */
+        printf("\033[1m%s\033[0m", state->status);
     } else {
-        /* clear any stale message */
-        printf("%-35s", "");
+        printf("%-30s", "");
     }
 
-    /* Bottom hint bar — always show key bindings */
+    /* Bottom hint bar */
     term_goto(STATUS_Y, 2);
-    printf("Press G to generate | U/N to switch distribution | Tab to edit fields | Q to quit");
+    printf("G=generate | U/N/B=distribution | Tab=edit | Arrows=scroll | Q=quit");
 
     term_flush();
 }
@@ -799,7 +796,7 @@ void tui_run(void) {
 
         case KEY_DOWN:
             if (state.result_count > 0
-                && state.result_scroll < state.result_count - 3) {
+                && state.result_scroll < state.result_count - 10) {
                 state.result_scroll++;
             }
             break;
