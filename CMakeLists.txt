@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+﻿cmake_minimum_required(VERSION 3.10)
 project(RandomNumber C)
 
 set(CMAKE_C_STANDARD 99)
@@ -11,6 +11,9 @@ add_executable(rng-tui
     src/stats.c
     src/output.c
     src/graph/graph.c
+    src/graph/graph_uniform.c
+    src/graph/graph_normal.c
+    src/graph/graph_bernoulli.c
 )
 
 target_link_libraries(rng-tui m)
