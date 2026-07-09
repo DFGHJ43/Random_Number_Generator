@@ -3,7 +3,7 @@
 An interactive terminal-based random number generator written in C.
 Zero external dependencies — uses only ANSI escape codes and the C standard library.
 
-## Features
+Features
 
 - Three-column TUI layout: controls | graph | results
 - Uniform distribution: random integers in [min, max]
@@ -31,18 +31,18 @@ gcc -Wall -Wextra -std=c99 -pedantic -Isrc -o rng-tui \
 
 ### Key Bindings
 
-| Key | Action |
-|-----|--------|
-| `G` | Generate random numbers |
-| `E` | Export results to CSV |
-| `U` | Switch to uniform distribution |
-| `N` | Switch to normal distribution |
-| `B` | Switch to Bernoulli distribution |
-| `Tab` | Cycle focus between input fields |
-| `Up` `Down` | Scroll results |
-| `Left` `Right` | Move cursor in input fields |
-| `Backspace` | Delete character in input field |
-| `Q` / `Esc` | Quit |
+| Key            | Action                           |
+| -------------- | -------------------------------- |
+| `G`            | Generate random numbers          |
+| `E`            | Export results to CSV            |
+| `U`            | Switch to uniform distribution   |
+| `N`            | Switch to normal distribution    |
+| `B`            | Switch to Bernoulli distribution |
+| `Tab`          | Cycle focus between input fields |
+| `Up` `Down`    | Scroll results                   |
+| `Left` `Right` | Move cursor in input fields      |
+| `Backspace`    | Delete character in input field  |
+| `Q` / `Esc`    | Quit                             |
 
 ## Project Structure
 
