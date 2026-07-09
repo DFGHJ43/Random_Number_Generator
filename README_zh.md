@@ -3,7 +3,7 @@
 一个基于终端界面的 C 语言随机数生成器。
 零外部依赖，仅使用 ANSI 转义序列和 C 标准库。
 
-![](C:/Users/gfd/AppData/Roaming/marktext/images/2026-07-09-12-01-28-image.png)
+![](C:\Users\gfd\Documents\GitHub\Random_Number_Generator\Images\screenshot%202026-07-09%20120825.png)
 
 ## 功能
 

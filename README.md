@@ -3,7 +3,7 @@
 An interactive terminal-based random number generator written in C.
 Zero external dependencies — uses only ANSI escape codes and the C standard library.
 
-![](C:/Users/gfd/AppData/Roaming/marktext/images/2026-07-09-12-02-42-image.png)
+![](C:\Users\gfd\Documents\GitHub\Random_Number_Generator\Images\screenshot%202026-07-09%20120825.png)
 
 ## Features
 
