@@ -14,6 +14,7 @@ add_executable(rng-tui
     src/graph/graph_uniform.c
     src/graph/graph_normal.c
     src/graph/graph_bernoulli.c
+    src/graph/graph_poisson.c
 )
 
 target_link_libraries(rng-tui m)

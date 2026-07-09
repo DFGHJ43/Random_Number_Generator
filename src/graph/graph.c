@@ -18,6 +18,8 @@ void draw_graph(const TuiState *state) {
         draw_graph_normal(state);
     } else if (state->dist == DIST_BERNOULLI) {
         draw_graph_bernoulli(state);
+    } else if (state->dist == DIST_POISSON) {
+        draw_graph_poisson(state);
     } else {
         draw_graph_uniform(state);
     }

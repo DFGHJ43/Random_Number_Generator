@@ -36,6 +36,7 @@ void tui_init(TuiState *state) {
     state->mean         = 0.0;
     state->stddev       = 1.0;
     state->prob         = 0.5;
+    state->lambda       = 1.0;
     state->result_count = 0;
     state->result_scroll= 0;
     state->focus_field  = FIELD_COUNT_NUM;
@@ -49,6 +50,7 @@ void tui_init(TuiState *state) {
     snprintf(state->field_buf[FIELD_MEAN],    FIELD_BUF_LEN, "%.1f", state->mean);
     snprintf(state->field_buf[FIELD_STDDEV],  FIELD_BUF_LEN, "%.1f", state->stddev);
     snprintf(state->field_buf[FIELD_PROB],    FIELD_BUF_LEN, "%.1f", state->prob);
+    snprintf(state->field_buf[FIELD_LAMBDA],  FIELD_BUF_LEN, "%.1f", state->lambda);
 
     for (int i = 0; i < FIELD_COUNT; i++)
         state->field_cursor[i] = (int)strlen(state->field_buf[i]);
@@ -174,6 +176,9 @@ static void do_generate(TuiState *state) {
     } else if (state->dist == DIST_BERNOULLI) {
         for (int i = 0; i < n; i++)
             state->results[i] = (double)rng_bernoulli(state->prob);
+    } else if (state->dist == DIST_POISSON) {
+        for (int i = 0; i < n; i++)
+            state->results[i] = (double)rng_poisson(state->lambda);
     } else {
         for (int i = 0; i < n; i++)
             state->results[i] = (double)rng_uniform(state->min_val, state->max_val);
@@ -181,7 +186,8 @@ static void do_generate(TuiState *state) {
 
     snprintf(state->status, sizeof(state->status), "Gen %d %s numbers.", n,
              state->dist == DIST_NORMAL    ? "normal" :
-             state->dist == DIST_BERNOULLI ? "bernoulli" : "uniform");
+             state->dist == DIST_BERNOULLI ? "bernoulli" :
+             state->dist == DIST_POISSON   ? "poisson" : "uniform");
 }
 
 static void do_export(TuiState *state) {
@@ -241,6 +247,12 @@ void tui_run(void) {
             state.focus_field = FIELD_COUNT_NUM;
             state.graph_dirty = 1;
             snprintf(state.status, sizeof(state.status), "Switched to Bernoulli."); break;
+
+        case 'p': case 'P':
+            state.dist = DIST_POISSON;
+            state.focus_field = FIELD_COUNT_NUM;
+            state.graph_dirty = 1;
+            snprintf(state.status, sizeof(state.status), "Switched to Poisson."); break;
 
         case 'g': case 'G':
             do_generate(&state); break;

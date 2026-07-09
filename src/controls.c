@@ -22,6 +22,8 @@ int field_is_visible(int fid, DistType dist) {
         return fid == FIELD_COUNT_NUM || fid == FIELD_MEAN || fid == FIELD_STDDEV;
     case DIST_BERNOULLI:
         return fid == FIELD_COUNT_NUM || fid == FIELD_PROB;
+    case DIST_POISSON:
+        return fid == FIELD_COUNT_NUM || fid == FIELD_LAMBDA;
     }
     return 0;
 }
@@ -58,12 +60,14 @@ void parse_fields(TuiState *state) {
     state->mean   = strtod(state->field_buf[FIELD_MEAN],   NULL);
     state->stddev = strtod(state->field_buf[FIELD_STDDEV], NULL);
     state->prob   = strtod(state->field_buf[FIELD_PROB],   NULL);
+    state->lambda = strtod(state->field_buf[FIELD_LAMBDA], NULL);
 
     if (state->count < 1)  state->count = 1;
     if (state->count > MAX_RESULTS) state->count = MAX_RESULTS;
     if (state->prob < 0.0) state->prob = 0.0;
     if (state->prob > 1.0) state->prob = 1.0;
     if (state->stddev <= 0.0) state->stddev = 1.0;
+    if (state->lambda <= 0.0) state->lambda = 1.0;
 }
 
 void draw_controls(TuiState *state) {
@@ -91,11 +95,17 @@ void draw_controls(TuiState *state) {
     else
         printf("[ ] Bernoulli (B)");
 
+    term_goto(y + 4, x + 2);
+    if (state->dist == DIST_POISSON)
+        printf("[*] Poisson      ");
+    else
+        printf("[ ] Poisson (P)  ");
+
     static const char *labels[FIELD_COUNT] = {
-        "Count:  ", "Min:    ", "Max:    ", "Mean:   ", "StdDev: ", "Prob:   "
+        "Count:  ", "Min:    ", "Max:    ", "Mean:   ", "StdDev: ", "Prob:   ", "Lambda: "
     };
 
-    int ry = y + 6;
+    int ry = y + 7;
     for (int i = 0; i < FIELD_COUNT; i++) {
         if (!field_is_visible(i, state->dist)) {
             term_goto(ry, x);
@@ -123,7 +133,7 @@ void draw_controls(TuiState *state) {
         printf("%-*s", LEFT_W, "");
     }
 
-    int by = y + 13;
+    int by = y + 14;
     term_goto(by, x);
     printf("[ Generate ]  G");
     term_goto(by + 1, x);

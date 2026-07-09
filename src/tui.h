@@ -38,7 +38,7 @@
 #define STATUS_Y  (TERM_H - 2)
 
 /* ── Input fields ─────────────────────────────────────── */
-#define FIELD_COUNT    6
+#define FIELD_COUNT    7
 #define FIELD_BUF_LEN  32
 
 typedef enum {
@@ -47,14 +47,16 @@ typedef enum {
     FIELD_MAX,
     FIELD_MEAN,
     FIELD_STDDEV,
-    FIELD_PROB
+    FIELD_PROB,
+    FIELD_LAMBDA
 } FieldId;
 
 /* ── Distribution type ────────────────────────────────── */
 typedef enum {
     DIST_UNIFORM    = 0,
     DIST_NORMAL     = 1,
-    DIST_BERNOULLI  = 2
+    DIST_BERNOULLI  = 2,
+    DIST_POISSON    = 3
 } DistType;
 
 /* ── Main application state ───────────────────────────── */
@@ -69,6 +71,7 @@ typedef struct {
     double   mean;
     double   stddev;
     double   prob;
+    double   lambda;
 
     /* results */
     double   results[MAX_RESULTS];
