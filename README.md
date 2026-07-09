@@ -3,6 +3,10 @@
 An interactive terminal-based random number generator written in C.
 Zero external dependencies — uses only ANSI escape codes and the C standard library.
 
+## Screenshot
+
+![RNG TUI Screenshot](screenshot.png)
+
 ## Features
 
 - Three-column TUI layout: controls | graph | results
