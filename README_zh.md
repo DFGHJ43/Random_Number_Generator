@@ -3,9 +3,9 @@
 一个基于终端界面的 C 语言随机数生成器。
 零外部依赖，仅使用 ANSI 转义序列和 C 标准库。
 
-![](C:\Users\gfd\Documents\GitHub\Random_Number_Generator\Images\screenshot%202026-07-09%20120825.png)
 
-## 功能
+
+功能
 
 - 三栏 TUI 布局：控制面板 | 分布图 | 结果列表
 - 均匀分布：在 [min, max] 范围内生成随机整数

@@ -3,9 +3,7 @@
 An interactive terminal-based random number generator written in C.
 Zero external dependencies — uses only ANSI escape codes and the C standard library.
 
-![](C:\Users\gfd\Documents\GitHub\Random_Number_Generator\Images\screenshot%202026-07-09%20120825.png)
-
-## Features
+Features
 
 - Three-column TUI layout: controls | graph | results
 - Uniform distribution: random integers in [min, max]
