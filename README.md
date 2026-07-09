@@ -1,4 +1,4 @@
-# Random Number Generator (RNG)
+﻿# Random Number Generator (RNG)
 
 An interactive terminal-based random number generator written in C.
 Zero external dependencies — uses only ANSI escape codes and the C standard library.
@@ -18,10 +18,12 @@ Zero external dependencies — uses only ANSI escape codes and the C standard li
 ```bash
 gcc -Wall -Wextra -std=c99 -pedantic -Isrc -o rng-tui \
     src/tui.c src/term.c src/controls.c src/random.c \
-    src/stats.c src/output.c src/graph/graph.c -lm
+    src/stats.c src/output.c \
+    src/graph/graph.c src/graph/graph_uniform.c \
+    src/graph/graph_normal.c src/graph/graph_bernoulli.c -lm
 ```
 
-> Or `make` if you have it installed (uses the included Makefile).
+> Or `cmake` if you have it installed (uses the included CMakeLists.txt).
 
 ## Usage
 
@@ -48,13 +50,17 @@ gcc -Wall -Wextra -std=c99 -pedantic -Isrc -o rng-tui \
 
 ```
 src/
-├── tui.c/h           Main event loop, frame rendering, results panel
-├── term.c/h          Terminal control (ANSI) + keyboard input
-├── controls.c/h      Left panel: parameter fields, field editing
-├── graph/graph.c/h   ASCII graph rendering (uniform/normal/bernoulli)
-├── random.c/h        Random number generation (rand-based)
-├── stats.c/h         Statistics (min, max, mean, stddev)
-└── output.c/h        Output to console / CSV file
+├── tui.c/h                     Main event loop, frame rendering, results panel
+├── term.c/h                    Terminal control (ANSI) + keyboard input
+├── controls.c/h                Left panel: parameter fields, field editing
+├── random.c/h                  Random number generation (rand-based)
+├── stats.c/h                   Statistics (min, max, mean, stddev)
+├── output.c/h                  Output to console / CSV file
+└── graph/
+    ├── graph.c/h               Graph area dispatch (clear + route)
+    ├── graph_uniform.c/h       Uniform distribution PDF graph
+    ├── graph_normal.c/h        Normal distribution PDF bell curve
+    └── graph_bernoulli.c/h     Bernoulli distribution PMF dual-bar
 ```
 
 ## License
