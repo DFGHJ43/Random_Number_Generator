@@ -1,41 +1,23 @@
 /*
- * tui.h — Layout constants, field enums, distribution types, TuiState
+ * tui.h — Layout fields, field enums, distribution types, TuiState
  *
- * Grid: LEFT_X/W=1/22  DIV1=23  MID_X/W=24/32  DIV2=56  RIGHT_X/W=57/22
- * TuiState fields:
- *   dist(count/min_val/max_val/mean/stddev/prob) — parameters
- *   results[] result_count/scroll — generated numbers & scroll offset
- *   focus_field field_buf[][] field_cursor[] — input field editing
- *   status[] — status bar message,  graph_dirty — selective redraw flag
+ * All layout coordinates are computed at runtime by tui_recompute_layout()
+ * from the actual terminal size — nothing is hardcoded to 80x24.
+ *
+ * Column grid (0-indexed): col 0 = border, left panel (lx..lx+lw-1),
+ * div1, mid panel (mx..mx+mw-1), div2, right panel (rx..rx+rw-1),
+ * last col = border.
  */
 
 #ifndef TUI_H
 #define TUI_H
 
-/* ── Terminal grid ────────────────────────────────────── */
-#define TERM_W  80
-#define TERM_H  24
-
-/* ── Column grid (strict, 0-indexed) ──────────────────── */
-/*  col 0=border, 1-22=controls, 23=div, 24-55=graph,
-    56=div, 57-78=results, 79=border                         */
-#define LEFT_X    1
-#define LEFT_W    22
-#define DIV1      23        /* LEFT_X + LEFT_W */
-#define MID_X     24        /* DIV1 + 1 */
-#define MID_W     32
-#define DIV2      56        /* MID_X + MID_W */
-#define RIGHT_X   57        /* DIV2 + 1 */
-#define RIGHT_W   22
-
-/* ── Graph inside middle panel ────────────────────────── */
-#define GRAPH_Y    4
-#define GRAPH_H    10
-#define GRAPH_PLOT_X  (MID_X + 2)   /* plot area start */
-#define GRAPH_PLOT_W  (MID_W - 4)   /* 28 data columns */
-
-/* ── Status bar ───────────────────────────────────────── */
-#define STATUS_Y  (TERM_H - 2)
+/* ── Minimum terminal size ──────────────────────────────
+ * Rows: the controls panel occupies rows 3-19 (title, radios,
+ * fields, buttons); 22 rows leave room for the status bar and
+ * bottom border. Cols: below ~60 the panels get too cramped. */
+#define TERM_MIN_COLS  60
+#define TERM_MIN_ROWS  22
 
 /* ── Input fields ─────────────────────────────────────── */
 #define FIELD_COUNT    7
@@ -63,6 +45,17 @@ typedef enum {
 #define MAX_RESULTS 1000
 
 typedef struct {
+    /* layout (recomputed at startup and on resize) */
+    int term_rows, term_cols;   /* actual terminal size */
+    int lx, lw;                 /* left panel (controls): start col, width */
+    int mx, mw;                 /* middle panel (graph): start col, width */
+    int rx, rw;                 /* right panel (results): start col, width */
+    int div1, div2;             /* divider columns */
+    int gy, gh;                 /* graph area: start row, height */
+    int gpx, gpw;               /* graph plot: start col, width */
+    int status_y;               /* status bar row */
+    int result_max_show;        /* max results visible in right panel */
+
     /* parameters */
     DistType dist;
     int      count;
@@ -97,5 +90,6 @@ typedef struct {
 void tui_init(TuiState *state);
 void tui_restore(void);
 void tui_run(void);
+void tui_recompute_layout(TuiState *state);
 
 #endif /* TUI_H */

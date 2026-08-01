@@ -22,12 +22,61 @@
  * TUI lifecycle
  * ══════════════════════════════════════════════════════════ */
 
+
+/*
+ * Recompute the full layout from the actual terminal size.
+ * Column split is proportional to the baseline 80-col layout:
+ * left/mid/right = 22/32/22 of the 76 content columns.
+ */
+void tui_recompute_layout(TuiState *state) {
+    int tw = state->term_cols;
+    int th = state->term_rows;
+    int content_w = tw - 4;  /* 4 = two borders + two dividers */
+
+    state->lw = content_w * 22 / 76;
+    state->mw = content_w * 32 / 76;
+    state->rw = content_w - state->lw - state->mw;  /* absorbs rounding */
+
+    state->lx   = 1;
+    state->div1 = state->lx + state->lw;
+    state->mx   = state->div1 + 1;
+    state->div2 = state->mx + state->mw;
+    state->rx   = state->div2 + 1;
+
+    /* Graph area */
+    state->gy = 4;
+    state->gh = th - 14;               /* 10 rows at a 24-row terminal */
+    if (state->gh < 6) state->gh = 6;  /* floor */
+    state->gpx = state->mx + 2;        /* 2-col margin inside mid panel */
+    state->gpw = state->mw - 4;        /* 2-col margin each side */
+    if (state->gpw < 10) state->gpw = 10;  /* floor */
+
+    /* Status bar */
+    state->status_y = th - 2;
+
+    /* Results panel */
+    state->result_max_show = th - 14;
+    if (state->result_max_show < 1) state->result_max_show = 1;
+}
+
 void tui_init(TuiState *state) {
 #ifdef _WIN32
     term_enable_vt();
 #endif
     term_clear();
     term_hide_cursor();
+
+    /* Detect terminal size; refuse to run if too small */
+    term_get_size(&state->term_rows, &state->term_cols);
+    if (state->term_cols < TERM_MIN_COLS || state->term_rows < TERM_MIN_ROWS) {
+        term_clear();
+        term_show_cursor();
+        printf("Terminal too small: %dx%d. Need at least %dx%d.\n",
+               state->term_cols, state->term_rows,
+               TERM_MIN_COLS, TERM_MIN_ROWS);
+        exit(1);
+    }
+    tui_recompute_layout(state);
 
     state->dist         = DIST_UNIFORM;
     state->count        = 1;
@@ -69,37 +118,42 @@ void tui_restore(void) {
  * Screen rendering
  * ══════════════════════════════════════════════════════════ */
 
-static void draw_box(void) {
+static void draw_box(const TuiState *state) {
+    int w = state->term_cols;
+    int h = state->term_rows;
+    int d1 = state->div1;
+    int d2 = state->div2;
+
     term_goto(0, 0); putchar('+');
-    for (int c = 1; c <= 78; c++) {
-        if (c == DIV1 || c == DIV2) putchar('+');
-        else                        putchar('-');
+    for (int c = 1; c <= w - 2; c++) {
+        if (c == d1 || c == d2) putchar('+');
+        else                    putchar('-');
     }
-    term_goto(0, 79); putchar('+');
+    term_goto(0, w - 1); putchar('+');
 
-    for (int r = 1; r <= TERM_H - 2; r++) {
-        term_goto(r, 0);    putchar('|');
-        term_goto(r, DIV1); putchar('|');
-        term_goto(r, DIV2); putchar('|');
-        term_goto(r, 79);   putchar('|');
+    for (int r = 1; r <= h - 2; r++) {
+        term_goto(r, 0);      putchar('|');
+        term_goto(r, d1);     putchar('|');
+        term_goto(r, d2);     putchar('|');
+        term_goto(r, w - 1);  putchar('|');
     }
 
-    term_goto(TERM_H - 1, 0); putchar('+');
-    for (int c = 1; c <= 78; c++) {
-        if (c == DIV1 || c == DIV2) putchar('+');
-        else                        putchar('-');
+    term_goto(h - 1, 0); putchar('+');
+    for (int c = 1; c <= w - 2; c++) {
+        if (c == d1 || c == d2) putchar('+');
+        else                    putchar('-');
     }
-    term_goto(TERM_H - 1, 79); putchar('+');
+    term_goto(h - 1, w - 1); putchar('+');
 }
 
 static void draw_results(const TuiState *state) {
-    int x = RIGHT_X;
+    int x = state->rx;
     int y = 3;
-    int max_show = 10;
+    int max_show = state->result_max_show;
 
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < max_show + 2; i++) {
         term_goto(y + i, x);
-        printf("%-*s", RIGHT_W, "");
+        printf("%-*s", state->rw, "");
     }
 
     if (state->result_count == 0) {
@@ -129,13 +183,13 @@ static void draw_results(const TuiState *state) {
  * ══════════════════════════════════════════════════════════ */
 
 static void draw_frame(TuiState *state) {
-    draw_box();
+    draw_box(state);
 
-    term_goto(0, LEFT_X + 2);
+    term_goto(0, state->lx + 2);
     printf("Random Number Generator");
-    term_goto(2, MID_X + 2);
+    term_goto(2, state->mx + 2);
     printf("Distribution Graph");
-    term_goto(2, RIGHT_X + 2);
+    term_goto(2, state->rx + 2);
     printf("Results");
 
     draw_controls(state);
@@ -146,11 +200,11 @@ static void draw_frame(TuiState *state) {
         state->graph_dirty = 0;
     }
 
-    term_goto(STATUS_Y, LEFT_X);
+    term_goto(state->status_y, state->lx);
     if (state->status[0] != '\0')
-        printf("\033[1m%-78s\033[0m", state->status);
+        printf("\033[1m%-*s\033[0m", state->term_cols - 2, state->status);
     else
-        printf("%-78s", "");
+        printf("%-*s", state->term_cols - 2, "");
 
     term_flush();
 }
@@ -213,16 +267,88 @@ static void do_export(TuiState *state) {
  * Main event loop
  * ══════════════════════════════════════════════════════════ */
 
+/*
+ * Poll for terminal resize. Returns:
+ *   0 — size unchanged
+ *   1 — size changed, layout recomputed (full redraw needed)
+ *  -1 — terminal too small (caller shows the overlay)
+ */
+static int check_resize(TuiState *state) {
+    int cur_rows, cur_cols;
+    term_get_size(&cur_rows, &cur_cols);
+
+    /* Report too-small on every call, even when the size is unchanged,
+       so the caller never falls through to rendering a garbled frame. */
+    if (cur_rows < TERM_MIN_ROWS || cur_cols < TERM_MIN_COLS) {
+        state->term_rows = cur_rows;
+        state->term_cols = cur_cols;
+        return -1;
+    }
+
+    if (cur_rows == state->term_rows && cur_cols == state->term_cols)
+        return 0;
+
+    state->term_rows = cur_rows;
+    state->term_cols = cur_cols;
+
+    tui_recompute_layout(state);
+    term_clear();
+    state->graph_dirty = 1;
+    if (state->result_scroll > state->result_count - state->result_max_show)
+        state->result_scroll = state->result_count - state->result_max_show;
+    if (state->result_scroll < 0) state->result_scroll = 0;
+    return 1;
+}
+
+static void show_too_small(const TuiState *state) {
+    term_clear();
+    printf("Terminal too small: %dx%d. Need at least %dx%d.\n",
+           state->term_cols, state->term_rows,
+           TERM_MIN_COLS, TERM_MIN_ROWS);
+    term_flush();
+}
+
 void tui_run(void) {
     TuiState state;
     tui_init(&state);
 
     while (state.running) {
+        if (check_resize(&state) < 0) {
+            /* Too small: show the overlay once, drain any keys pressed
+               while it is up, then wait for the window to grow back.
+               No redraw here — flashing it every frame is needless. */
+            show_too_small(&state);
+            while (state.running && check_resize(&state) < 0) {
+                /* Keep draining keys the user presses while the overlay
+                   is up, so none get replayed after the window grows */
+                while (kb_hit()) kb_get();
+                term_sleep_ms(200);
+            }
+            if (!state.running) break;
+            /* check_resize() recomputed the layout and cleared the
+               screen — fall through to draw the fresh frame */
+        }
+
         draw_frame(&state);
 
-        while (!kb_hit() && state.running)
+        int resized = 0;
+        while (!kb_hit() && state.running) {
             term_sleep_ms(10);
+            /* Detect resize while idle so a shrunken window never
+               keeps showing a stale (garbled) frame */
+            if (check_resize(&state) != 0) {
+                resized = 1;
+                break;
+            }
+        }
         if (!state.running) break;
+
+        /* A resize ended the wait: loop back so the overlay is shown
+           (if too small) or the frame is redrawn at the new size.
+           Skipping read_key() here keeps buffered keys from being
+           processed against a stale frame. */
+        if (resized)
+            continue;
 
         int key = read_key();
 
@@ -272,7 +398,8 @@ void tui_run(void) {
             break;
 
         case KEY_DOWN:
-            if (state.result_count > 0 && state.result_scroll < state.result_count - 10)
+            if (state.result_count > 0 &&
+                state.result_scroll < state.result_count - state.result_max_show)
                 state.result_scroll++;
             break;
 

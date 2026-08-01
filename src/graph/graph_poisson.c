@@ -11,10 +11,10 @@
 #include <string.h>
 
 void draw_graph_poisson(const TuiState *state) {
-    int gx = GRAPH_PLOT_X;
-    int gy = GRAPH_Y;
-    int gw = GRAPH_PLOT_W;
-    int gh = GRAPH_H;
+    int gx = state->gpx;
+    int gy = state->gy;
+    int gw = state->gpw;
+    int gh = state->gh;
     double lambda = state->lambda;
 
     if (lambda <= 0.0) return;
@@ -29,8 +29,10 @@ void draw_graph_poisson(const TuiState *state) {
     term_goto(gy + gh, gx + gw);
     putchar('>');
 
+    char title[48];
+    snprintf(title, sizeof(title), "Poisson PMF  lambda=%.1f", lambda);
     term_goto(gy - 1, gx);
-    printf("Poisson PMF  lambda=%.1f", lambda);
+    printf("%-*.*s", state->mw - 2, state->mw - 2, title);
 
     int k_max = (int)(lambda + 4.0 * sqrt(lambda));
     if (k_max < (int)lambda + 1) k_max = (int)lambda + 1;
@@ -93,6 +95,6 @@ void draw_graph_poisson(const TuiState *state) {
         printf("L");
     }
 
-    term_goto(gy, MID_X);
+    term_goto(gy, state->mx);
     printf("%.3f", pmf_max);
 }

@@ -10,10 +10,10 @@
 #include <stdio.h>
 
 void draw_graph_bernoulli(const TuiState *state) {
-    int gx = GRAPH_PLOT_X;
-    int gy = GRAPH_Y;
-    int gw = GRAPH_PLOT_W;
-    int gh = GRAPH_H;
+    int gx = state->gpx;
+    int gy = state->gy;
+    int gw = state->gpw;
+    int gh = state->gh;
     double p = state->prob;
 
     if (p < 0.0) p = 0.0;
@@ -29,12 +29,17 @@ void draw_graph_bernoulli(const TuiState *state) {
     term_goto(gy + gh, gx + gw);
     putchar('>');
 
+    char title[48];
+    snprintf(title, sizeof(title), "Bernoulli PMF  p=%.2f", p);
     term_goto(gy - 1, gx);
-    printf("Bernoulli PMF  p=%.2f", p);
+    printf("%-*.*s", state->mw - 2, state->mw - 2, title);
 
-    int bar0_x = gx + 4;
-    int bar1_x = gx + gw - 8;
-    int bar_w  = 6;
+    /* Scale the original 80-col geometry (bar0 +4, bar_w 6, bar1 +20)
+       proportionally to the plot width */
+    int bar_w  = 6 * gw / 28;
+    if (bar_w < 1) bar_w = 1;
+    int bar0_x = gx + 4 * gw / 28;
+    int bar1_x = gx + 20 * gw / 28;
 
     int h0 = (int)((1.0 - p) * (double)(gh - 1) + 0.5);
     int h1 = (int)(p * (double)(gh - 1) + 0.5);
@@ -54,14 +59,14 @@ void draw_graph_bernoulli(const TuiState *state) {
         }
     }
 
-    term_goto(gy + gh + 1, bar0_x + 2);
+    term_goto(gy + gh + 1, bar0_x + (bar_w - 1) / 2);
     printf("0");
-    term_goto(gy + gh + 1, bar1_x + 2);
+    term_goto(gy + gh + 1, bar1_x + (bar_w - 1) / 2);
     printf("1");
 
-    term_goto(gy, MID_X);
+    term_goto(gy, state->mx);
     printf("1.0");
-    term_goto(gy + gh, MID_X);
+    term_goto(gy + gh, state->mx);
     printf("0.0");
 
     term_goto(gy + gh - h0 - 1, bar0_x);

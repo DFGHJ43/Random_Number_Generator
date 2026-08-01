@@ -9,9 +9,9 @@
 #include <stdio.h>
 
 void draw_graph(const TuiState *state) {
-    for (int row = GRAPH_Y - 1; row < GRAPH_Y + GRAPH_H + 3; row++) {
-        term_goto(row, MID_X);
-        for (int col = 0; col < MID_W; col++) putchar(' ');
+    for (int row = state->gy - 1; row < state->gy + state->gh + 3; row++) {
+        term_goto(row, state->mx);
+        for (int col = 0; col < state->mw; col++) putchar(' ');
     }
 
     if (state->dist == DIST_NORMAL) {

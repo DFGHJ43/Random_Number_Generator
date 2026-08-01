@@ -15,10 +15,10 @@
 #endif
 
 void draw_graph_normal(const TuiState *state) {
-    int gx = GRAPH_PLOT_X;
-    int gy = GRAPH_Y;
-    int gw = GRAPH_PLOT_W;
-    int gh = GRAPH_H;
+    int gx = state->gpx;
+    int gy = state->gy;
+    int gw = state->gpw;
+    int gh = state->gh;
     double mu = state->mean;
     double sigma = state->stddev;
 
@@ -34,8 +34,10 @@ void draw_graph_normal(const TuiState *state) {
     term_goto(gy + gh, gx + gw);
     putchar('>');
 
+    char title[48];
+    snprintf(title, sizeof(title), "Normal PDF  mu=%.1f sigma=%.1f", mu, sigma);
     term_goto(gy - 1, gx);
-    printf("Normal PDF  mu=%.1f sigma=%.1f", mu, sigma);
+    printf("%-*.*s", state->mw - 2, state->mw - 2, title);
 
     double x_min = mu - 3.0 * sigma;
     double x_max = mu + 3.0 * sigma;
@@ -70,6 +72,6 @@ void draw_graph_normal(const TuiState *state) {
         printf("mu");
     }
 
-    term_goto(gy, MID_X);
+    term_goto(gy, state->mx);
     printf("%.3f", pdf_max);
 }

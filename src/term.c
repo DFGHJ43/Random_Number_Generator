@@ -15,6 +15,7 @@
 #include <windows.h>
 #else
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
 #endif
@@ -60,6 +61,39 @@ void term_enable_vt(void) {
     SetConsoleMode(hOut, dwMode);
 }
 #endif
+
+/* ── Terminal size ────────────────────────────────────── */
+
+int term_get_size(int *rows, int *cols) {
+#ifdef _WIN32
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if (hOut != INVALID_HANDLE_VALUE &&
+        GetConsoleScreenBufferInfo(hOut, &csbi)) {
+        /* srWindow = visible window; dwSize includes scrollback */
+        *cols = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        *rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+        if (*cols > 0 && *rows > 0)
+            return 0;
+    }
+#else
+    struct winsize ws = {0};
+    /* Try stderr, stdout, stdin in order — any may be redirected */
+    int fds[3] = { STDERR_FILENO, STDOUT_FILENO, STDIN_FILENO };
+    for (int i = 0; i < 3; i++) {
+        if (ioctl(fds[i], TIOCGWINSZ, &ws) == 0 &&
+            ws.ws_col > 0 && ws.ws_row > 0) {
+            *cols = ws.ws_col;
+            *rows = ws.ws_row;
+            return 0;
+        }
+    }
+#endif
+    /* Fallback */
+    *rows = 24;
+    *cols = 80;
+    return -1;
+}
 
 /* ══════════════════════════════════════════════════════════
  * Keyboard input

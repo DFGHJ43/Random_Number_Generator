@@ -70,46 +70,47 @@ void parse_fields(TuiState *state) {
     if (state->lambda <= 0.0) state->lambda = 1.0;
 }
 
+/*
+ * Draw one distribution radio row. The key hint "(X)" is dropped and the
+ * label truncated when the left panel is too narrow, so text never spills
+ * into the divider column.
+ */
+static void draw_option(const TuiState *state, int row, const char *name,
+                        const char *hint, int selected) {
+    char buf[24];
+    if (state->lw >= 17)
+        snprintf(buf, sizeof(buf), "%s %s (%s)",
+                 selected ? "[*]" : "[ ]", name, hint);
+    else
+        snprintf(buf, sizeof(buf), "%s %s", selected ? "[*]" : "[ ]", name);
+    term_goto(row, state->lx + 2);
+    printf("%-*.*s", state->lw - 2, state->lw - 2, buf);
+}
+
 void draw_controls(TuiState *state) {
-    int x = LEFT_X;
+    int x = state->lx;
     int y = 3;
 
     term_goto(y, x);
-    printf("%-*s", LEFT_W, "Distribution:");
+    printf("%-*s", state->lw, "Distribution:");
 
-    term_goto(y + 1, x + 2);
-    if (state->dist == DIST_UNIFORM)
-        printf("[*] Uniform      ");
-    else
-        printf("[ ] Uniform (U)  ");
-
-    term_goto(y + 2, x + 2);
-    if (state->dist == DIST_NORMAL)
-        printf("[*] Normal       ");
-    else
-        printf("[ ] Normal (N)   ");
-
-    term_goto(y + 3, x + 2);
-    if (state->dist == DIST_BERNOULLI)
-        printf("[*] Bernoulli    ");
-    else
-        printf("[ ] Bernoulli (B)");
-
-    term_goto(y + 4, x + 2);
-    if (state->dist == DIST_POISSON)
-        printf("[*] Poisson      ");
-    else
-        printf("[ ] Poisson (P)  ");
+    draw_option(state, y + 1, "Uniform",   "U", state->dist == DIST_UNIFORM);
+    draw_option(state, y + 2, "Normal",    "N", state->dist == DIST_NORMAL);
+    draw_option(state, y + 3, "Bernoulli", "B", state->dist == DIST_BERNOULLI);
+    draw_option(state, y + 4, "Poisson",   "P", state->dist == DIST_POISSON);
 
     static const char *labels[FIELD_COUNT] = {
         "Count:  ", "Min:    ", "Max:    ", "Mean:   ", "StdDev: ", "Prob:   ", "Lambda: "
     };
 
+    int value_w = state->lw - 12;   /* label(8) + gap(2) + brackets(2) */
+    if (value_w < 1) value_w = 1;
+
     int ry = y + 7;
     for (int i = 0; i < FIELD_COUNT; i++) {
         if (!field_is_visible(i, state->dist)) {
             term_goto(ry, x);
-            printf("%-*s", LEFT_W, "");
+            printf("%-*s", state->lw, "");
             ry++;
             continue;
         }
@@ -120,7 +121,7 @@ void draw_controls(TuiState *state) {
         printf("[");
         if (i == state->focus_field)
             printf("\033[7m");
-        printf("%-10s", state->field_buf[i]);
+        printf("%-*.*s", value_w, value_w, state->field_buf[i]);
         if (i == state->focus_field)
             printf("\033[0m");
         printf("]");
@@ -130,7 +131,7 @@ void draw_controls(TuiState *state) {
 
     for (; ry < y + 12; ry++) {
         term_goto(ry, x);
-        printf("%-*s", LEFT_W, "");
+        printf("%-*s", state->lw, "");
     }
 
     int by = y + 14;
@@ -141,8 +142,8 @@ void draw_controls(TuiState *state) {
     term_goto(by + 2, x);
     printf("[ Quit     ]  Q");
 
-    for (int row = by + 3; row < TERM_H - 1; row++) {
+    for (int row = by + 3; row < state->term_rows - 1; row++) {
         term_goto(row, x);
-        printf("%-*s", LEFT_W, "");
+        printf("%-*s", state->lw, "");
     }
 }
