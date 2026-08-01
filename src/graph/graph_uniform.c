@@ -14,10 +14,10 @@
 #endif
 
 void draw_graph_uniform(const TuiState *state) {
-    int gx = GRAPH_PLOT_X;
-    int gy = GRAPH_Y;
-    int gw = GRAPH_PLOT_W;
-    int gh = GRAPH_H;
+    int gx = state->gpx;
+    int gy = state->gy;
+    int gw = state->gpw;
+    int gh = state->gh;
     int min = state->min_val;
     int max = state->max_val;
 
@@ -33,8 +33,10 @@ void draw_graph_uniform(const TuiState *state) {
     term_goto(gy + gh, gx + gw);
     putchar('>');
 
+    char title[48];
+    snprintf(title, sizeof(title), "Uniform PDF  [%d, %d]", min, max);
     term_goto(gy - 1, gx);
-    printf("Uniform PDF  [%d, %d]", min, max);
+    printf("%-*.*s", state->mw - 2, state->mw - 2, title);
 
     int bar_h = gh - 1;
     if (bar_h < 1) bar_h = 1;
@@ -54,8 +56,8 @@ void draw_graph_uniform(const TuiState *state) {
     printf("%s", buf);
 
     double pdf_val = 1.0 / (max - min);
-    term_goto(gy, MID_X);
+    term_goto(gy, state->mx);
     printf("%4s", "");
-    term_goto(gy, MID_X);
+    term_goto(gy, state->mx);
     printf("%.2f", pdf_val);
 }

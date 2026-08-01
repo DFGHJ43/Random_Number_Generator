@@ -29,4 +29,11 @@ double rng_normal(double mean, double stddev);
  */
 int rng_bernoulli(double p);
 
+/*
+ * Generate a Poisson-distributed random integer
+ * with the given rate parameter lambda (lambda > 0).
+ * Uses Knuth's algorithm.
+ */
+int rng_poisson(double lambda);
+
 #endif /* RANDOM_H */

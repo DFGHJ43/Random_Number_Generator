@@ -13,6 +13,7 @@
 - 均匀分布：在 [min, max] 范围内生成随机整数
 - 正态分布：Box-Muller 变换，可配置均值和标准差
 - 伯努利分布：按概率 p 生成 0/1 结果
+- 泊松分布：Knuth 算法，可配置速率参数 λ
 - 实时 ASCII 概率密度/质量函数图形
 - CSV 导出，文件名带时间戳
 - 可指定随机种子，结果可复现
@@ -22,10 +23,13 @@
 ```bash
 gcc -Wall -Wextra -std=c99 -pedantic -Isrc -o rng-tui \
     src/tui.c src/term.c src/controls.c src/random.c \
-    src/stats.c src/output.c src/graph/graph.c -lm
+    src/stats.c src/output.c \
+    src/graph/graph.c src/graph/graph_uniform.c \
+    src/graph/graph_normal.c src/graph/graph_bernoulli.c \
+    src/graph/graph_poisson.c -lm
 ```
 
-> 安装了 make 的话也可以直接 `make`（使用项目自带的 Makefile）。
+> 安装了 CMake 的话也可以使用项目自带的 CMakeLists.txt 构建。
 
 ## 使用
 
@@ -42,6 +46,7 @@ gcc -Wall -Wextra -std=c99 -pedantic -Isrc -o rng-tui \
 | `U`         | 切换到均匀分布   |
 | `N`         | 切换到正态分布   |
 | `B`         | 切换到伯努利分布  |
+| `P`         | 切换到泊松分布   |
 | `Tab`       | 切换输入框焦点   |
 | `↑` `↓`     | 滚动结果列表    |
 | `←` `→`     | 在输入框中移动光标 |
@@ -55,10 +60,15 @@ src/
 ├── tui.c/h           主事件循环、画面渲染、结果面板
 ├── term.c/h          终端控制 (ANSI) + 键盘输入
 ├── controls.c/h      左栏：参数字段、字段编辑
-├── graph/graph.c/h   ASCII 图形绘制 (均匀/正态/伯努利)
 ├── random.c/h        随机数生成 (基于 rand)
 ├── stats.c/h         统计计算 (最小值、最大值、均值、标准差)
-└── output.c/h        输出到控制台 / CSV 文件
+├── output.c/h        输出到控制台 / CSV 文件
+└── graph/
+    ├── graph.c/h             图形区域分发 (清屏 + 路由)
+    ├── graph_uniform.c/h     均匀分布 PDF 图形
+    ├── graph_normal.c/h      正态分布 PDF 钟形曲线
+    ├── graph_bernoulli.c/h   伯努利分布 PMF 双柱图
+    └── graph_poisson.c/h     泊松分布 PMF 柱状图
 ```
 
 ## 协议

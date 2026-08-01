@@ -16,5 +16,6 @@ void draw_graph(const TuiState *state);
 #include "graph_uniform.h"
 #include "graph_normal.h"
 #include "graph_bernoulli.h"
+#include "graph_poisson.h"
 
 #endif /* GRAPH_MODULE_H */

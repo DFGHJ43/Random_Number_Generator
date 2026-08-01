@@ -64,3 +64,26 @@ int rng_bernoulli(double p) {
     double u = (double)rand() / (double)RAND_MAX;  /* NOLINT */
     return (u < p) ? 1 : 0;
 }
+
+int rng_poisson(double lambda) {
+    /* Clamp lambda to positive */
+    if (lambda <= 0.0) lambda = 0.001;
+
+    /*
+     * Knuth's algorithm for Poisson distribution:
+     * L = e^(-lambda), k = 0, p = 1
+     * do { k++; p *= U } while (p > L)
+     * return k - 1
+     */
+    double L = exp(-lambda);
+    int k = 0;
+    double p = 1.0;
+
+    do {
+        k++;
+        double u = (double)rand() / (double)RAND_MAX;  /* NOLINT */
+        p *= u;
+    } while (p > L);
+
+    return k - 1;
+}

@@ -18,6 +18,10 @@ void term_sleep_ms(int ms);
 void term_enable_vt(void);
 #endif
 
+/* ── Terminal size ────────────────────────────────────── */
+/* Returns 0 on success. On failure fills *rows=24, *cols=80 and returns -1. */
+int term_get_size(int *rows, int *cols);
+
 /* ── Keyboard input ───────────────────────────────────── */
 #define KEY_UP      256
 #define KEY_DOWN    257
