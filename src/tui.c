@@ -151,7 +151,9 @@ static void draw_results(const TuiState *state) {
     int y = 3;
     int max_show = state->result_max_show;
 
-    for (int i = 0; i < max_show + 2; i++) {
+    /* Clear one extra row: the "(N total, arrows)" hint below the list
+       would otherwise survive when the count drops to fit on screen */
+    for (int i = 0; i < max_show + 3; i++) {
         term_goto(y + i, x);
         printf("%-*s", state->rw, "");
     }
@@ -173,8 +175,13 @@ static void draw_results(const TuiState *state) {
     }
 
     if (state->result_count > max_show) {
+        char hint[48];
+        snprintf(hint, sizeof(hint), "(%d total, arrows)", state->result_count);
         term_goto(y + max_show + 2, x);
-        printf("(%d total, arrows)", state->result_count);
+        /* Truncate to the panel width (rw=17 at 60 cols): a full
+           "(1000 total, arrows)" wraps past the border. Same pattern
+           as draw_option in controls.c. */
+        printf("%-*.*s", state->rw, state->rw, hint);
     }
 }
 

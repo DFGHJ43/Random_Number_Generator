@@ -14,6 +14,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Upper bound for lambda: keeps k_max = (int)(lambda + 4*sqrt(lambda)) in
+   graph_poisson.c below INT_MAX (that cast is UB beyond ~2.1e9). */
+#define LAMBDA_MAX 1e9
+
 int field_is_visible(int fid, DistType dist) {
     switch (dist) {
     case DIST_UNIFORM:
@@ -68,6 +72,7 @@ void parse_fields(TuiState *state) {
     if (state->prob > 1.0) state->prob = 1.0;
     if (state->stddev <= 0.0) state->stddev = 1.0;
     if (state->lambda <= 0.0) state->lambda = 1.0;
+    if (state->lambda > LAMBDA_MAX) state->lambda = LAMBDA_MAX;
 }
 
 /*
