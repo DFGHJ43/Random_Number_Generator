@@ -32,7 +32,8 @@ int rng_bernoulli(double p);
 /*
  * Generate a Poisson-distributed random integer
  * with the given rate parameter lambda (lambda > 0).
- * Uses Knuth's algorithm.
+ * Uses Knuth's algorithm for lambda <= 10, exact PTRS
+ * rejection sampling (Hörmann) for larger lambda.
  */
 int rng_poisson(double lambda);
 
